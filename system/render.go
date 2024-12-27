@@ -6,6 +6,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/milk9111/left-behind/component"
+	"github.com/milk9111/left-behind/engine"
 	"github.com/yohamta/donburi"
 	"github.com/yohamta/donburi/features/transform"
 	"github.com/yohamta/donburi/filter"
@@ -78,20 +79,23 @@ func (r *Render) Draw(w donburi.World, screen *ebiten.Image) {
 		})
 
 		for _, e := range byLayer[layer] {
-			if component.WorldHidden(e) {
+			sprite := component.Sprite.Get(e)
+			if sprite.Hidden {
 				continue
 			}
 
-			sprite := component.Sprite.Get(e)
 			position := transform.WorldPosition(e)
+			rotation := transform.Transform.Get(e).LocalRotation
 
 			op := &ebiten.DrawImageOptions{}
-			op.GeoM.Translate(position.X, position.Y)
+			op.GeoM.Translate(-float64(sprite.Image.Bounds().Dx())/2, -float64(sprite.Image.Bounds().Dy())/2)
+			op.GeoM.Rotate(engine.Deg2Rad(rotation))
+			op.GeoM.Translate(position.X+float64(sprite.Image.Bounds().Dx())/2, position.Y+float64(sprite.Image.Bounds().Dy())/2)
 			r.world.DrawImage(sprite.Image, op)
 		}
 	}
 
 	op := &ebiten.DrawImageOptions{}
-	// op.GeoM.Scale(2, 2)
+	op.GeoM.Scale(2, 2)
 	screen.DrawImage(r.world, op)
 }

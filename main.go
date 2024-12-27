@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"log"
-	"math"
 
 	"github.com/milk9111/left-behind/component"
 	"github.com/milk9111/left-behind/scene"
@@ -22,6 +21,8 @@ func main() {
 
 	// couldn't get the screen size to dynamically resize so decided to hardcode it here
 	config := Config{
+		WorldWidth:   1024 / 2,
+		WorldHeight:  768 / 2,
 		ScreenWidth:  1024,
 		ScreenHeight: 768,
 	}
@@ -82,14 +83,16 @@ type Game struct {
 
 type Config struct {
 	Quick        bool
+	WorldWidth   int
+	WorldHeight  int
 	ScreenWidth  int
 	ScreenHeight int
 }
 
 func NewGame(config Config) *Game {
 	return &Game{
-		worldWidth:   config.ScreenWidth,
-		worldHeight:  config.ScreenHeight,
+		worldWidth:   config.WorldWidth,
+		worldHeight:  config.WorldHeight,
 		screenWidth:  config.ScreenWidth,
 		screenHeight: config.ScreenHeight,
 	}
@@ -112,16 +115,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	g.scene.Draw(screen)
 }
 
-func (g *Game) LayoutF(logicWinWidth, logicWinHeight float64) (float64, float64) {
-	scale := ebiten.Monitor().DeviceScaleFactor()
-	screenWidth := math.Ceil(logicWinWidth * scale)
-	screenHeight := math.Ceil(logicWinHeight * scale)
-	g.scaleFactor = (screenWidth * screenHeight) / (float64(g.worldWidth) * float64(g.worldHeight))
-	g.screenWidth = int(screenWidth)
-	g.screenHeight = int(screenHeight)
-	return float64(g.worldWidth), float64(g.worldHeight)
-}
-
 func (g *Game) Layout(_, _ int) (int, int) {
-	panic("shouldn't have called Layout")
+	return g.screenWidth, g.screenHeight
 }

@@ -3,9 +3,12 @@ package scene
 import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/milk9111/left-behind/archetype"
+	"github.com/milk9111/left-behind/assets"
 	"github.com/milk9111/left-behind/component"
 	"github.com/milk9111/left-behind/system"
 	"github.com/yohamta/donburi"
+	dmath "github.com/yohamta/donburi/features/math"
+	"github.com/yohamta/donburi/features/transform"
 )
 
 type System interface {
@@ -21,7 +24,8 @@ type Debuggable interface {
 }
 
 type Game struct {
-	game *component.GameData
+	game  *component.GameData
+	level *assets.Level
 
 	world       donburi.World
 	systems     []System
@@ -29,9 +33,10 @@ type Game struct {
 	debuggables []Debuggable
 }
 
-func NewGame(game *component.GameData) *Game {
+func NewGame(game *component.GameData, level *assets.Level) *Game {
 	g := &Game{
-		game: game,
+		game:  game,
+		level: level,
 	}
 
 	g.loadLevel()
@@ -43,6 +48,9 @@ func (g *Game) loadLevel() {
 	render := system.NewRender(g.game.WorldWidth, g.game.WorldHeight)
 
 	g.systems = []System{
+		system.NewInput(),
+		system.NewUpdate(),
+		system.NewStick(),
 		render,
 	}
 
@@ -51,6 +59,8 @@ func (g *Game) loadLevel() {
 	}
 
 	g.world = g.createWorld()
+
+	system.NewStart().Update(g.world)
 }
 
 func (g *Game) createWorld() donburi.World {
@@ -59,7 +69,14 @@ func (g *Game) createWorld() donburi.World {
 	game := w.Entry(w.Create(component.Game))
 	component.Game.Set(game, g.game)
 
-	archetype.NewGrid(w, g.game, 5, 5)
+	grid := archetype.NewGrid(w, g.game, g.level.Cols, g.level.Rows)
+
+	player := archetype.NewPlayer(w, dmath.NewVec2(0, 0))
+
+	goal := archetype.NewGoal(w, dmath.NewVec2(32, 32))
+
+	transform.AppendChild(grid, player, false)
+	transform.AppendChild(grid, goal, false)
 
 	return w
 }

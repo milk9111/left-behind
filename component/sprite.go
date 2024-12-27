@@ -33,7 +33,7 @@ func (s *SpriteData) PivotPoint() dmath.Vec2 {
 
 var Sprite = donburi.NewComponentType[SpriteData]()
 
-func WorldHidden(entry *donburi.Entry) bool {
+func WorldSpriteHidden(entry *donburi.Entry) bool {
 	s := Sprite.Get(entry)
 
 	p, ok := transform.GetParent(entry)
@@ -41,7 +41,7 @@ func WorldHidden(entry *donburi.Entry) bool {
 		return s.Hidden
 	}
 
-	hidden := WorldHidden(p) || s.Hidden
+	hidden := WorldSpriteHidden(p) || s.Hidden
 	return hidden
 }
 
