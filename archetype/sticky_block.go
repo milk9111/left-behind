@@ -9,31 +9,28 @@ import (
 	"github.com/yohamta/donburi/features/transform"
 )
 
-// TODO - Sticky blocks and non-sticky blocks
-func NewGoal(w donburi.World, position dmath.Vec2) *donburi.Entry {
+func NewStickyBlock(w donburi.World, position dmath.Vec2) *donburi.Entry {
 	e := w.Entry(w.Create(
 		transform.Transform,
 		component.Sprite,
 		component.Cell,
-		component.Start,
-		component.TagGoal,
 		scripts.StaticComponent,
+		component.Start,
 	))
 
-	transform.Transform.Get(e).LocalPosition = position
-
-	component.Cell.SetValue(e, component.CellData{
-		Position: position,
-		IsSticky: false,
-		Type:     component.CellTypeGoal,
-	})
-
 	component.Sprite.SetValue(e, component.SpriteData{
-		Image: assets.SpriteGoal,
+		Image: assets.SpriteStickyBlock,
 		Layer: component.SpriteLayerEntity,
 	})
 
+	component.Cell.SetValue(e, component.CellData{
+		Position: position,
+		IsSticky: true,
+		Type:     component.CellTypeStickyBlock,
+	})
+
 	static := scripts.NewStatic(e)
+
 	component.Start.SetValue(e, component.StartData{
 		Handler: static,
 	})

@@ -5,17 +5,19 @@ import (
 	"sort"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/milk9111/left-behind/assets"
 	"github.com/milk9111/left-behind/component"
 	"github.com/milk9111/left-behind/engine"
 	"github.com/yohamta/donburi"
 	"github.com/yohamta/donburi/features/transform"
 	"github.com/yohamta/donburi/filter"
-	"golang.org/x/exp/shiny/materialdesign/colornames"
 )
 
 type Render struct {
 	query *donburi.Query
 	world *ebiten.Image
+
+	time int
 }
 
 func NewRender(width, height int) *Render {
@@ -30,13 +32,20 @@ func NewRender(width, height int) *Render {
 }
 
 func (r *Render) Update(w donburi.World) {
-
+	r.time++
 }
 
 func (r *Render) Draw(w donburi.World, screen *ebiten.Image) {
 	r.world.Clear()
 
-	r.world.Fill(colornames.Red400)
+	// r.world.Fill(colornames.Red400)
+
+	rsop := &ebiten.DrawRectShaderOptions{}
+	rsop.Uniforms = map[string]any{
+		"Time":       float32(r.time) / 60,
+		"Resolution": []float32{float32(r.world.Bounds().Dx()), float32(r.world.Bounds().Dy())},
+	}
+	r.world.DrawRectShader(r.world.Bounds().Dx(), r.world.Bounds().Dy(), assets.ShaderRainbowFlows, rsop)
 
 	var entries []*donburi.Entry
 	r.query.Each(w, func(e *donburi.Entry) {

@@ -17,7 +17,8 @@ func NewPlayer(w donburi.World, position dmath.Vec2) *donburi.Entry {
 		component.InputHandler,
 		component.Start,
 		component.Update,
-		component.Sticky,
+		component.Cell,
+		component.AudioQueue,
 	))
 
 	transform.Transform.Get(e).LocalPosition = position
@@ -41,9 +42,10 @@ func NewPlayer(w donburi.World, position dmath.Vec2) *donburi.Entry {
 		Handler: player,
 	})
 
-	component.Sticky.SetValue(e, component.StickyData{
+	component.Cell.SetValue(e, component.CellData{
 		Position: position,
-		Disabled: false,
+		IsSticky: true,
+		Type:     component.CellTypePlayer,
 	})
 
 	scripts.PlayerComponent.Set(e, player)

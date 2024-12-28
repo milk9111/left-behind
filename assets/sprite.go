@@ -18,13 +18,16 @@ var (
 	testPlayer_png []byte
 	//go:embed sprites/goal.png
 	goal_png []byte
+	//go:embed sprites/sticky_block.png
+	stickyBlock_png []byte
 )
 
 var (
-	SpriteTestCell   *ebiten.Image
-	SpriteTestCell2  *ebiten.Image
-	SpriteTestPlayer *ebiten.Image
-	SpriteGoal       *ebiten.Image
+	SpriteTestCell    *ebiten.Image
+	SpriteTestCell2   *ebiten.Image
+	SpriteTestPlayer  *ebiten.Image
+	SpriteGoal        *ebiten.Image
+	SpriteStickyBlock *ebiten.Image
 )
 
 func init() {
@@ -32,6 +35,7 @@ func init() {
 	SpriteTestCell2 = mustImage(testCell2_png)
 	SpriteTestPlayer = mustImage(testPlayer_png)
 	SpriteGoal = mustImage(goal_png)
+	SpriteStickyBlock = mustImage(stickyBlock_png)
 }
 
 func mustImage(b []byte) *ebiten.Image {

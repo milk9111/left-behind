@@ -4,7 +4,8 @@ import (
 	_ "embed"
 	"encoding/json"
 
-	"github.com/milk9111/left-behind/assets/scripts"
+	"github.com/milk9111/left-behind/component"
+	"github.com/milk9111/left-behind/engine"
 	dmath "github.com/yohamta/donburi/features/math"
 )
 
@@ -25,12 +26,6 @@ func init() {
 	Level2 = mustLevel(level2_json)
 }
 
-const (
-	cellTypeEmpty  = ""
-	cellTypePlayer = "P"
-	cellTypeGoal   = "G"
-)
-
 type Level struct {
 	Name string   `json:"name"`
 	Cols int      `json:"cols"`
@@ -47,26 +42,39 @@ func mustLevel(b []byte) *Level {
 	return &level
 }
 
-func (l *Level) PlayerPos() dmath.Vec2 {
+func (l *Level) PlayerPosition() dmath.Vec2 {
 	for i, c := range l.Data {
-		if c != cellTypePlayer {
+		if c != component.CellTypePlayer {
 			continue
 		}
 
-		return scripts.IndexToVec2(i%l.Cols, i/l.Rows)
+		return engine.IndexToVec2(i%l.Cols, i/l.Rows)
 	}
 
 	panic("no player position found")
 }
 
-func (l *Level) GoalPos() dmath.Vec2 {
+func (l *Level) GoalPosition() dmath.Vec2 {
 	for i, c := range l.Data {
-		if c != cellTypeGoal {
+		if c != component.CellTypeGoal {
 			continue
 		}
 
-		return scripts.IndexToVec2(i%l.Cols, i/l.Rows)
+		return engine.IndexToVec2(i%l.Cols, i/l.Rows)
 	}
 
 	panic("no goal position found")
+}
+
+func (l *Level) StickyBlockPositions() []dmath.Vec2 {
+	var stickyBlocks []dmath.Vec2
+	for i, c := range l.Data {
+		if c != component.CellTypeStickyBlock {
+			continue
+		}
+
+		stickyBlocks = append(stickyBlocks, engine.IndexToVec2(i%l.Cols, i/l.Rows))
+	}
+
+	return stickyBlocks
 }

@@ -6,11 +6,19 @@ import (
 	dmath "github.com/yohamta/donburi/features/math"
 )
 
-type StickyData struct {
-	Disabled       bool
+const (
+	CellTypeEmpty       = ""
+	CellTypePlayer      = "P"
+	CellTypeGoal        = "G"
+	CellTypeStickyBlock = "s"
+)
+
+type CellData struct {
+	IsSticky       bool
 	Position       dmath.Vec2 // sticky position in the grid, not actual position in world space
+	Type           string
 	QueuedPosition *dmath.Vec2
 	Tween          *tween.Vec2
 }
 
-var Sticky = donburi.NewComponentType[StickyData]()
+var Cell = donburi.NewComponentType[CellData]()

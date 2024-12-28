@@ -22,6 +22,7 @@ func NewGrid(w donburi.World, game *component.GameData, cols, rows int) *donburi
 			component.Update,
 			component.Start,
 			scripts.GridComponent,
+			component.AudioQueue,
 		),
 	)
 

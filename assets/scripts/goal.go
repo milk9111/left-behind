@@ -6,20 +6,20 @@ import (
 	"github.com/yohamta/donburi/features/transform"
 )
 
-type Goal struct {
+type Static struct {
 	e *donburi.Entry
 	t *transform.TransformData
 }
 
-func NewGoal(e *donburi.Entry) *Goal {
-	return &Goal{
+func NewStatic(e *donburi.Entry) *Static {
+	return &Static{
 		e: e,
 		t: transform.Transform.Get(e),
 	}
 }
 
-func (g *Goal) Start(w donburi.World) {
-	g.t.LocalPosition = transform.Transform.Get(MustFindEntry(w, GridComponent)).LocalPosition.Add(component.Sticky.Get(g.e).Position)
+func (s *Static) Start(w donburi.World) {
+	s.t.LocalPosition = transform.Transform.Get(MustFindEntry(w, GridComponent)).LocalPosition.Add(component.Cell.Get(s.e).Position)
 }
 
-var GoalComponent = donburi.NewComponentType[Goal]()
+var StaticComponent = donburi.NewComponentType[Static]()

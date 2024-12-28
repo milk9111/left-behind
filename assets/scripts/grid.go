@@ -3,7 +3,9 @@ package scripts
 import (
 	"time"
 
+	"github.com/milk9111/left-behind/assets"
 	"github.com/milk9111/left-behind/component"
+	"github.com/milk9111/left-behind/engine"
 	"github.com/milk9111/left-behind/engine/tween"
 	"github.com/yohamta/donburi"
 	dmath "github.com/yohamta/donburi/features/math"
@@ -11,12 +13,14 @@ import (
 )
 
 type Grid struct {
-	e    *donburi.Entry
-	t    *transform.TransformData
+	e          *donburi.Entry
+	t          *transform.TransformData
+	audioQueue *component.AudioQueueData
+
 	cols int
 	rows int
 
-	grid   [][]*component.StickyData
+	grid   [][]*component.CellData
 	player *Player
 
 	tween         *tween.Float64
@@ -28,29 +32,30 @@ func NewGrid(
 	cols int,
 	rows int,
 ) *Grid {
-	grid := make([][]*component.StickyData, cols)
+	grid := make([][]*component.CellData, cols)
 	for i := 0; i < cols; i++ {
-		grid[i] = make([]*component.StickyData, rows)
+		grid[i] = make([]*component.CellData, rows)
 	}
 
 	return &Grid{
-		e:    e,
-		t:    transform.Transform.Get(e),
-		cols: cols,
-		rows: rows,
-		grid: grid,
+		e:          e,
+		t:          transform.Transform.Get(e),
+		audioQueue: component.AudioQueue.Get(e),
+		cols:       cols,
+		rows:       rows,
+		grid:       grid,
 	}
 }
 
 func (g *Grid) Start(w donburi.World) {
 	g.player = MustFindComponent(w, PlayerComponent)
 
-	stickies := MustFindEntries(w, component.Sticky)
+	cells := MustFindEntries(w, component.Cell)
 
-	for _, e := range stickies {
-		sticky := component.Sticky.Get(e)
-		col, row := Vec2ToIndex(sticky.Position)
-		g.grid[col][row] = sticky
+	for _, e := range cells {
+		cell := component.Cell.Get(e)
+		col, row := engine.Vec2ToIndex(cell.Position)
+		g.grid[col][row] = cell
 	}
 }
 
@@ -74,73 +79,111 @@ func (g *Grid) OnInput(inputEventType component.InputEventType) {
 		return
 	}
 
+	var nextTween *tween.Float64
 	if inputEventType == component.InputEventTypeRotateLeft {
-		g.tween = tween.NewFloat64(1000*time.Millisecond, g.t.LocalRotation, g.t.LocalRotation-90, tween.EaseInOutCubic)
+		nextTween = tween.NewFloat64(1000*time.Millisecond, g.t.LocalRotation, g.t.LocalRotation-90, tween.EaseInOutCubic)
 	} else if inputEventType == component.InputEventTypeRotateBehind {
-		g.tween = tween.NewFloat64(1000*time.Millisecond, g.t.LocalRotation, g.t.LocalRotation-180, tween.EaseInOutCubic)
+		nextTween = tween.NewFloat64(1000*time.Millisecond, g.t.LocalRotation, g.t.LocalRotation-180, tween.EaseInOutCubic)
 	} else {
 		return // exit early because it's not input grid cares about
 	}
 
-	nextGrid := make([][]*component.StickyData, g.cols)
+	// instantiate next grid
+	nextGrid := make([][]*component.CellData, g.cols)
 	for i := 0; i < g.cols; i++ {
-		nextGrid[i] = make([]*component.StickyData, g.rows)
-	}
-
-	for i := 0; i < g.cols; i++ {
+		nextGrid[i] = make([]*component.CellData, g.rows)
 		for j := 0; j < g.rows; j++ {
 			s := g.grid[i][j]
-			if s == nil {
+			if s == nil || s.IsSticky {
 				continue
 			}
 
-			if s.Disabled {
-				nextGrid[i][j] = s
-			} else {
-				x := j
-				y := g.cols - 1 - i
-				if inputEventType == component.InputEventTypeRotateBehind {
-					x = g.cols - 1 - i
-					y = g.rows - 1 - j
-				}
-				nextGrid[x][y] = s
-				pos := IndexToVec2(x, y)
-				s.QueuedPosition = &pos
-			}
-
-			g.grid[i][j] = nil
+			nextGrid[i][j] = s
 		}
 	}
 
-	g.grid = nextGrid
-	g.player.inputDisabled = true
-	g.inputDisabled = true
+	// fill up next grid with translated cells
+	for i := 0; i < g.cols; i++ {
+		for j := 0; j < g.rows; j++ {
+			s := g.grid[i][j]
+			if s == nil || !s.IsSticky {
+				continue
+			}
+
+			x := j
+			y := g.cols - 1 - i
+			if inputEventType == component.InputEventTypeRotateBehind {
+				x = g.cols - 1 - i
+				y = g.rows - 1 - j
+			}
+			nextGrid[x][y] = s
+		}
+	}
+
+	// compare next grid with current grid for invalid conflicts
+	hasConflict := false
+	for i := 0; i < g.cols; i++ {
+		for j := 0; j < g.rows; j++ {
+			curr := g.grid[i][j]
+			next := nextGrid[i][j]
+
+			if curr == nil || next == nil || curr == next || curr.IsSticky == next.IsSticky {
+				continue
+			}
+
+			if !(curr.Type == component.CellTypeGoal && next.Type == component.CellTypePlayer) {
+				hasConflict = true
+				break
+			}
+		}
+
+		if hasConflict {
+			break
+		}
+	}
+
+	if !hasConflict {
+		// apply translation
+		for i := 0; i < g.cols; i++ {
+			for j := 0; j < g.rows; j++ {
+				s := nextGrid[i][j]
+				if s == nil {
+					continue
+				}
+
+				pos := engine.IndexToVec2(i, j)
+				s.QueuedPosition = &pos
+			}
+		}
+
+		g.grid = nextGrid
+		g.tween = nextTween
+		g.player.inputDisabled = true
+		g.inputDisabled = true
+	} else {
+		g.audioQueue.Enqueue(assets.SFXBadMove)
+	}
 }
 
 func (g *Grid) CanMove(pos dmath.Vec2) bool {
-	col, row := Vec2ToIndex(pos)
-	if 0 > col || col >= len(g.grid) {
+	col, row := engine.Vec2ToIndex(pos)
+	if (0 > col || col >= len(g.grid)) ||
+		(0 > row || row >= len(g.grid[col])) {
 		return false
 	}
 
-	return 0 <= row && row < len(g.grid[col])
+	s := g.grid[col][row]
+
+	return s == nil || s.Type == component.CellTypeGoal
 }
 
 func (g *Grid) Move(currPos, nextPos dmath.Vec2) {
-	currCol, currRow := Vec2ToIndex(currPos)
-	nextCol, nextRow := Vec2ToIndex(nextPos)
+	currCol, currRow := engine.Vec2ToIndex(currPos)
+	nextCol, nextRow := engine.Vec2ToIndex(nextPos)
 
 	s := g.grid[currCol][currRow]
 	g.grid[nextCol][nextRow] = s
 	g.grid[currCol][currRow] = nil
-}
-
-func IndexToVec2(col, row int) dmath.Vec2 {
-	return dmath.NewVec2(float64(col*32), float64(row*32))
-}
-
-func Vec2ToIndex(vec2 dmath.Vec2) (int, int) {
-	return int(vec2.X / 32), int(vec2.Y / 32)
 }
 
 var GridComponent = donburi.NewComponentType[Grid]()

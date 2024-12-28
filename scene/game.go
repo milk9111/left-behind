@@ -48,7 +48,8 @@ func (g *Game) loadLevel() {
 	g.systems = []System{
 		system.NewInput(),
 		system.NewUpdate(),
-		system.NewStick(),
+		system.NewSticky(),
+		system.NewAudio(),
 		render,
 	}
 
@@ -69,12 +70,13 @@ func (g *Game) createWorld() donburi.World {
 
 	archetype.NewGrid(w, g.game, g.level.Cols, g.level.Rows)
 
-	archetype.NewPlayer(w, g.level.PlayerPos())
+	archetype.NewPlayer(w, g.level.PlayerPosition())
 
-	archetype.NewGoal(w, g.level.GoalPos())
+	archetype.NewGoal(w, g.level.GoalPosition())
 
-	// transform.AppendChild(grid, player, false)
-	// transform.AppendChild(grid, goal, false)
+	for _, pos := range g.level.StickyBlockPositions() {
+		archetype.NewStickyBlock(w, pos)
+	}
 
 	return w
 }

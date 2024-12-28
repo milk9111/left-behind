@@ -9,14 +9,22 @@ import (
 var (
 	//go:embed shaders/outline.kage
 	outline_kage []byte
+	//go:embed shaders/glossy_gradient.kage
+	glossyGradient_kage []byte
+	//go:embed shaders/rainbow_flows.kage
+	rainbowFlows_kage []byte
 )
 
 var (
-	ShaderOutline *ebiten.Shader
+	ShaderOutline        *ebiten.Shader
+	ShaderGlossyGradient *ebiten.Shader
+	ShaderRainbowFlows   *ebiten.Shader
 )
 
 func init() {
 	ShaderOutline = mustShader(outline_kage)
+	ShaderGlossyGradient = mustShader(glossyGradient_kage)
+	ShaderRainbowFlows = mustShader(rainbowFlows_kage)
 }
 
 func mustShader(b []byte) *ebiten.Shader {
