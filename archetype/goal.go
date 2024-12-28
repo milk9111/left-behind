@@ -24,6 +24,7 @@ func NewGoal(w donburi.World, position dmath.Vec2) *donburi.Entry {
 	transform.Transform.Get(e).LocalPosition = position
 
 	component.Sticky.SetValue(e, component.StickyData{
+		Position: position,
 		Disabled: true,
 	})
 

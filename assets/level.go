@@ -11,14 +11,18 @@ import (
 var (
 	//go:embed levels/level_1.json
 	level1_json []byte
+	//go:embed levels/level_2.json
+	level2_json []byte
 )
 
 var (
 	Level1 *Level
+	Level2 *Level
 )
 
 func init() {
 	Level1 = mustLevel(level1_json)
+	Level2 = mustLevel(level2_json)
 }
 
 const (

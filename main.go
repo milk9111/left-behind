@@ -102,7 +102,7 @@ func NewGame(config Config) *Game {
 				WorldHeight: config.WorldHeight,
 				TileSize:    32,
 			},
-			assets.Level1,
+			assets.Level2,
 		),
 	}
 }
