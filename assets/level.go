@@ -3,6 +3,9 @@ package assets
 import (
 	_ "embed"
 	"encoding/json"
+
+	"github.com/milk9111/left-behind/assets/scripts"
+	dmath "github.com/yohamta/donburi/features/math"
 )
 
 var (
@@ -14,15 +17,21 @@ var (
 	Level1 *Level
 )
 
+func init() {
+	Level1 = mustLevel(level1_json)
+}
+
+const (
+	cellTypeEmpty  = ""
+	cellTypePlayer = "P"
+	cellTypeGoal   = "G"
+)
+
 type Level struct {
 	Name string   `json:"name"`
 	Cols int      `json:"cols"`
 	Rows int      `json:"rows"`
 	Data []string `json:"data"`
-}
-
-func init() {
-	Level1 = mustLevel(level1_json)
 }
 
 func mustLevel(b []byte) *Level {
@@ -32,4 +41,28 @@ func mustLevel(b []byte) *Level {
 	}
 
 	return &level
+}
+
+func (l *Level) PlayerPos() dmath.Vec2 {
+	for i, c := range l.Data {
+		if c != cellTypePlayer {
+			continue
+		}
+
+		return scripts.IndexToVec2(i%l.Cols, i/l.Rows)
+	}
+
+	panic("no player position found")
+}
+
+func (l *Level) GoalPos() dmath.Vec2 {
+	for i, c := range l.Data {
+		if c != cellTypeGoal {
+			continue
+		}
+
+		return scripts.IndexToVec2(i%l.Cols, i/l.Rows)
+	}
+
+	panic("no goal position found")
 }

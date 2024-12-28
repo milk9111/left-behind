@@ -2,6 +2,7 @@ package archetype
 
 import (
 	"github.com/milk9111/left-behind/assets"
+	"github.com/milk9111/left-behind/assets/scripts"
 	"github.com/milk9111/left-behind/component"
 	"github.com/yohamta/donburi"
 	dmath "github.com/yohamta/donburi/features/math"
@@ -15,7 +16,9 @@ func NewGoal(w donburi.World, position dmath.Vec2) *donburi.Entry {
 		transform.Transform,
 		component.Sprite,
 		component.Sticky,
+		component.Start,
 		component.TagGoal,
+		scripts.GoalComponent,
 	))
 
 	transform.Transform.Get(e).LocalPosition = position
@@ -28,6 +31,13 @@ func NewGoal(w donburi.World, position dmath.Vec2) *donburi.Entry {
 		Image: assets.SpriteGoal,
 		Layer: component.SpriteLayerEntity,
 	})
+
+	goal := scripts.NewGoal(e)
+	component.Start.SetValue(e, component.StartData{
+		Handler: goal,
+	})
+
+	scripts.GoalComponent.Set(e, goal)
 
 	return e
 }

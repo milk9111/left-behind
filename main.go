@@ -4,6 +4,7 @@ import (
 	"flag"
 	"log"
 
+	"github.com/milk9111/left-behind/assets"
 	"github.com/milk9111/left-behind/component"
 	"github.com/milk9111/left-behind/scene"
 
@@ -95,18 +96,18 @@ func NewGame(config Config) *Game {
 		worldHeight:  config.WorldHeight,
 		screenWidth:  config.ScreenWidth,
 		screenHeight: config.ScreenHeight,
+		scene: scene.NewGame(
+			&component.GameData{
+				WorldWidth:  config.WorldWidth,
+				WorldHeight: config.WorldHeight,
+				TileSize:    32,
+			},
+			assets.Level1,
+		),
 	}
 }
 
 func (g *Game) Update() error {
-	if g.scene == nil {
-		g.scene = scene.NewGame(&component.GameData{
-			WorldWidth:  g.worldWidth,
-			WorldHeight: g.worldHeight,
-			TileSize:    32,
-		})
-	}
-
 	g.scene.Update()
 	return nil
 }

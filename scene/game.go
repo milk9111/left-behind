@@ -7,8 +7,6 @@ import (
 	"github.com/milk9111/left-behind/component"
 	"github.com/milk9111/left-behind/system"
 	"github.com/yohamta/donburi"
-	dmath "github.com/yohamta/donburi/features/math"
-	"github.com/yohamta/donburi/features/transform"
 )
 
 type System interface {
@@ -69,14 +67,14 @@ func (g *Game) createWorld() donburi.World {
 	game := w.Entry(w.Create(component.Game))
 	component.Game.Set(game, g.game)
 
-	grid := archetype.NewGrid(w, g.game, g.level.Cols, g.level.Rows)
+	archetype.NewGrid(w, g.game, g.level.Cols, g.level.Rows)
 
-	player := archetype.NewPlayer(w, dmath.NewVec2(0, 0))
+	archetype.NewPlayer(w, g.level.PlayerPos())
 
-	goal := archetype.NewGoal(w, dmath.NewVec2(32, 32))
+	archetype.NewGoal(w, g.level.GoalPos())
 
-	transform.AppendChild(grid, player, false)
-	transform.AppendChild(grid, goal, false)
+	// transform.AppendChild(grid, player, false)
+	// transform.AppendChild(grid, goal, false)
 
 	return w
 }

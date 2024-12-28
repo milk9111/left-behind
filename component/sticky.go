@@ -8,6 +8,7 @@ import (
 
 type StickyData struct {
 	Disabled       bool
+	Position       dmath.Vec2 // sticky position in the grid, not actual position in world space
 	QueuedPosition *dmath.Vec2
 	Tween          *tween.Vec2
 }

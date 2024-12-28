@@ -75,7 +75,7 @@ func (r *Render) Draw(w donburi.World, screen *ebiten.Image) {
 			aPos := transform.WorldPosition(a)
 			bPos := transform.WorldPosition(b)
 
-			return int(aPos.Add(aSprite.PivotPoint()).Y - bPos.Add(bSprite.PivotPoint()).Y)
+			return int(aPos.Y - bPos.Y)
 		})
 
 		for _, e := range byLayer[layer] {
@@ -85,7 +85,7 @@ func (r *Render) Draw(w donburi.World, screen *ebiten.Image) {
 			}
 
 			position := transform.WorldPosition(e)
-			rotation := transform.Transform.Get(e).LocalRotation
+			rotation := transform.WorldRotation(e)
 
 			op := &ebiten.DrawImageOptions{}
 			op.GeoM.Translate(-float64(sprite.Image.Bounds().Dx())/2, -float64(sprite.Image.Bounds().Dy())/2)

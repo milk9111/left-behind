@@ -45,14 +45,12 @@ func NewGrid(
 func (g *Grid) Start(w donburi.World) {
 	g.player = MustFindComponent(w, PlayerComponent)
 
-	children, ok := transform.GetChildren(g.e)
-	if !ok {
-		panic(newScriptError("no children found for grid"))
-	}
+	stickies := MustFindEntries(w, component.Sticky)
 
-	for _, e := range children {
-		col, row := Vec2ToIndex(transform.Transform.Get(e).LocalPosition)
-		g.grid[col][row] = component.Sticky.Get(e)
+	for _, e := range stickies {
+		sticky := component.Sticky.Get(e)
+		col, row := Vec2ToIndex(sticky.Position)
+		g.grid[col][row] = sticky
 	}
 }
 

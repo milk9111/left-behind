@@ -42,6 +42,7 @@ func NewPlayer(w donburi.World, position dmath.Vec2) *donburi.Entry {
 	})
 
 	component.Sticky.SetValue(e, component.StickyData{
+		Position: position,
 		Disabled: false,
 	})
 

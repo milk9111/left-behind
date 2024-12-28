@@ -10,6 +10,7 @@ import (
 	"github.com/yohamta/donburi"
 	dmath "github.com/yohamta/donburi/features/math"
 	"github.com/yohamta/donburi/features/transform"
+	"golang.org/x/image/colornames"
 )
 
 func NewGrid(w donburi.World, game *component.GameData, cols, rows int) *donburi.Entry {
@@ -77,6 +78,21 @@ func NewGrid(w donburi.World, game *component.GameData, cols, rows int) *donburi
 	})
 
 	scripts.GridComponent.Set(e, grid)
+
+	outline := w.Entry(w.Create(
+		transform.Transform,
+		component.Sprite,
+	))
+
+	outlineImg := ebiten.NewImage(gridImg.Bounds().Dx()+4, gridImg.Bounds().Dy()+4)
+	outlineImg.Fill(colornames.Black)
+	component.Sprite.SetValue(outline, component.SpriteData{
+		Image: outlineImg,
+		Layer: component.SpriteLayerBackground,
+	})
+
+	transform.ChangeParent(outline, e, false)
+	transform.Transform.Get(outline).LocalPosition = dmath.NewVec2(-2, -2)
 
 	return e
 }
