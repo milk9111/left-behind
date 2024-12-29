@@ -1,12 +1,12 @@
 package scripts
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/milk9111/left-behind/assets"
 	"github.com/milk9111/left-behind/component"
 	"github.com/milk9111/left-behind/engine/tween"
+	"github.com/milk9111/left-behind/event"
 	"github.com/yohamta/donburi"
 	dmath "github.com/yohamta/donburi/features/math"
 	"github.com/yohamta/donburi/features/transform"
@@ -42,10 +42,10 @@ func (p *Player) Start(w donburi.World) {
 	p.t.LocalPosition = p.grid.t.LocalPosition.Add(p.cell.Position)
 }
 
-func (p *Player) Update() {
+func (p *Player) Update(w donburi.World) {
 	if !p.goalReached && p.HasReachedGoal() {
 		p.goalReached = true
-		p.GoalReached()
+		event.ReachedGoal.Publish(w, event.ReachedGoalData{})
 	}
 
 	if p.tween == nil {
@@ -95,8 +95,9 @@ func (p *Player) HasReachedGoal() bool {
 	return p.t.LocalPosition.Equal(p.goal.LocalPosition)
 }
 
-func (p *Player) GoalReached() {
-	fmt.Println("REACHED GOAL!!!")
+func (p *Player) OnReachedGoal(_ donburi.World, _ event.ReachedGoalData) {
+	p.inputDisabled = true
+	p.audioQueue.Enqueue(assets.SFXGoalReached)
 }
 
 var PlayerComponent = donburi.NewComponentType[Player]()

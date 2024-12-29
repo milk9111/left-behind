@@ -1,8 +1,9 @@
 package assets
 
 import (
-	_ "embed"
+	"embed"
 	"encoding/json"
+	"fmt"
 
 	"github.com/milk9111/left-behind/component"
 	"github.com/milk9111/left-behind/engine"
@@ -10,20 +11,58 @@ import (
 )
 
 var (
-	//go:embed levels/level_1.json
-	level1_json []byte
-	//go:embed levels/level_2.json
-	level2_json []byte
+	//go:embed levels
+	levelsFS embed.FS
 )
 
-var (
-	Level1 *Level
-	Level2 *Level
-)
+var Levels map[string]*Level
+var LevelConfig *levelConfig
 
 func init() {
-	Level1 = mustLevel(level1_json)
-	Level2 = mustLevel(level2_json)
+	Levels = make(map[string]*Level)
+
+	dirEntries, err := levelsFS.ReadDir("levels")
+	if err != nil {
+		panic(err)
+	}
+
+	for _, entry := range dirEntries {
+		f, err := levelsFS.ReadFile(fmt.Sprintf("levels/%s", entry.Name()))
+		if err != nil {
+			panic(err)
+		}
+
+		if entry.Name() == "config.json" {
+			var conf levelConfig
+			if err := json.Unmarshal(f, &conf); err != nil {
+				panic(err)
+			}
+
+			LevelConfig = &conf
+		} else {
+			level := mustLevel(f)
+			Levels[level.Name] = level
+		}
+	}
+}
+
+type levelConfig struct {
+	LevelOrder    []string `json:"level_order"`
+	StartingLevel string   `json:"starting_level"`
+}
+
+func StartingLevel() *Level {
+	return Levels[LevelConfig.StartingLevel]
+}
+
+func NextLevel(name string) *Level {
+	for i, lvl := range LevelConfig.LevelOrder {
+		if name == lvl && i+1 < len(LevelConfig.LevelOrder) {
+			return Levels[LevelConfig.LevelOrder[i+1]]
+		}
+	}
+
+	return StartingLevel()
 }
 
 type Level struct {
@@ -77,4 +116,17 @@ func (l *Level) StickyBlockPositions() []dmath.Vec2 {
 	}
 
 	return stickyBlocks
+}
+
+func (l *Level) FloatingBlockPositions() []dmath.Vec2 {
+	var floatingBlocks []dmath.Vec2
+	for i, c := range l.Data {
+		if c != component.CellTypeFloatingBlock {
+			continue
+		}
+
+		floatingBlocks = append(floatingBlocks, engine.IndexToVec2(i%l.Cols, i/l.Rows))
+	}
+
+	return floatingBlocks
 }

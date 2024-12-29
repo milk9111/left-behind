@@ -11,14 +11,18 @@ import (
 var (
 	//go:embed sfx/bad_move.wav
 	badMove_wav []byte
+	//go:embed sfx/goal_reached.wav
+	goalReached_wav []byte
 )
 
 var (
-	SFXBadMove AudioClip
+	SFXBadMove     AudioClip
+	SFXGoalReached AudioClip
 )
 
 func init() {
 	SFXBadMove = mustAudioClip(badMove_wav)
+	SFXGoalReached = mustAudioClip(goalReached_wav)
 }
 
 type AudioClip []byte

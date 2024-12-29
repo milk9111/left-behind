@@ -20,6 +20,6 @@ func NewUpdate() *Update {
 
 func (u *Update) Update(w donburi.World) {
 	u.query.Each(w, func(e *donburi.Entry) {
-		component.Update.Get(e).Handler.Update()
+		component.Update.Get(e).Handler.Update(w)
 	})
 }

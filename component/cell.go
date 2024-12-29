@@ -7,10 +7,11 @@ import (
 )
 
 const (
-	CellTypeEmpty       = ""
-	CellTypePlayer      = "P"
-	CellTypeGoal        = "G"
-	CellTypeStickyBlock = "s"
+	CellTypeEmpty         = ""
+	CellTypePlayer        = "P"
+	CellTypeGoal          = "G"
+	CellTypeStickyBlock   = "s"
+	CellTypeFloatingBlock = "f"
 )
 
 type CellData struct {

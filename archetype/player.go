@@ -4,6 +4,7 @@ import (
 	"github.com/milk9111/left-behind/assets"
 	"github.com/milk9111/left-behind/assets/scripts"
 	"github.com/milk9111/left-behind/component"
+	"github.com/milk9111/left-behind/event"
 	"github.com/yohamta/donburi"
 	dmath "github.com/yohamta/donburi/features/math"
 	"github.com/yohamta/donburi/features/transform"
@@ -49,6 +50,8 @@ func NewPlayer(w donburi.World, position dmath.Vec2) *donburi.Entry {
 	})
 
 	scripts.PlayerComponent.Set(e, player)
+
+	event.ReachedGoal.Subscribe(w, player.OnReachedGoal)
 
 	return e
 }

@@ -3,7 +3,7 @@ package component
 import "github.com/yohamta/donburi"
 
 type updater interface {
-	Update()
+	Update(w donburi.World)
 }
 
 type UpdateData struct {

@@ -5,6 +5,7 @@ import (
 	"github.com/milk9111/left-behind/archetype"
 	"github.com/milk9111/left-behind/assets"
 	"github.com/milk9111/left-behind/component"
+	"github.com/milk9111/left-behind/event"
 	"github.com/milk9111/left-behind/system"
 	"github.com/yohamta/donburi"
 )
@@ -49,6 +50,7 @@ func (g *Game) loadLevel() {
 		system.NewInput(),
 		system.NewUpdate(),
 		system.NewSticky(),
+		system.NewProcessEvents(),
 		system.NewAudio(),
 		render,
 	}
@@ -74,9 +76,17 @@ func (g *Game) createWorld() donburi.World {
 
 	archetype.NewGoal(w, g.level.GoalPosition())
 
+	archetype.NewLevelTransition(w)
+
 	for _, pos := range g.level.StickyBlockPositions() {
 		archetype.NewStickyBlock(w, pos)
 	}
+
+	for _, pos := range g.level.FloatingBlockPositions() {
+		archetype.NewFloatingBlock(w, pos)
+	}
+
+	event.FinishedLevelTransition.Subscribe(w, g.OnFinishedLevelTransition)
 
 	return w
 }
@@ -94,4 +104,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	}
 
 	// TODO - run DebugDraw
+}
+
+func (g *Game) OnFinishedLevelTransition(_ donburi.World, _ event.FinishedLevelTransitionData) {
+	g.level = assets.NextLevel(g.level.Name)
+	g.loadLevel()
 }

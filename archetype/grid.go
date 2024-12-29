@@ -7,6 +7,7 @@ import (
 	"github.com/milk9111/left-behind/assets"
 	"github.com/milk9111/left-behind/assets/scripts"
 	"github.com/milk9111/left-behind/component"
+	"github.com/milk9111/left-behind/event"
 	"github.com/yohamta/donburi"
 	dmath "github.com/yohamta/donburi/features/math"
 	"github.com/yohamta/donburi/features/transform"
@@ -79,6 +80,8 @@ func NewGrid(w donburi.World, game *component.GameData, cols, rows int) *donburi
 	})
 
 	scripts.GridComponent.Set(e, grid)
+
+	event.ReachedGoal.Subscribe(w, grid.OnReachedGoal)
 
 	outline := w.Entry(w.Create(
 		transform.Transform,

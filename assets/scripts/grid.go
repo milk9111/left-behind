@@ -7,6 +7,7 @@ import (
 	"github.com/milk9111/left-behind/component"
 	"github.com/milk9111/left-behind/engine"
 	"github.com/milk9111/left-behind/engine/tween"
+	"github.com/milk9111/left-behind/event"
 	"github.com/yohamta/donburi"
 	dmath "github.com/yohamta/donburi/features/math"
 	"github.com/yohamta/donburi/features/transform"
@@ -59,7 +60,7 @@ func (g *Grid) Start(w donburi.World) {
 	}
 }
 
-func (g *Grid) Update() {
+func (g *Grid) Update(_ donburi.World) {
 	if g.tween == nil {
 		return
 	}
@@ -184,6 +185,10 @@ func (g *Grid) Move(currPos, nextPos dmath.Vec2) {
 	s := g.grid[currCol][currRow]
 	g.grid[nextCol][nextRow] = s
 	g.grid[currCol][currRow] = nil
+}
+
+func (g *Grid) OnReachedGoal(_ donburi.World, _ event.ReachedGoalData) {
+	g.inputDisabled = true
 }
 
 var GridComponent = donburi.NewComponentType[Grid]()

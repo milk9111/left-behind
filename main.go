@@ -78,8 +78,6 @@ type Game struct {
 	worldHeight  int
 	screenWidth  int
 	screenHeight int
-
-	scaleFactor float64
 }
 
 type Config struct {
@@ -102,7 +100,7 @@ func NewGame(config Config) *Game {
 				WorldHeight: config.WorldHeight,
 				TileSize:    32,
 			},
-			assets.Level2,
+			assets.StartingLevel(),
 		),
 	}
 }
