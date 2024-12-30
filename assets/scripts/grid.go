@@ -13,9 +13,8 @@ import (
 )
 
 type Grid struct {
-	e          *donburi.Entry
-	t          *transform.TransformData
-	audioQueue *component.AudioQueueData
+	e *donburi.Entry
+	t *transform.TransformData
 
 	cols int
 	rows int
@@ -36,12 +35,11 @@ func NewGrid(
 	}
 
 	return &Grid{
-		e:          e,
-		t:          transform.Transform.Get(e),
-		audioQueue: component.AudioQueue.Get(e),
-		cols:       cols,
-		rows:       rows,
-		grid:       grid,
+		e:    e,
+		t:    transform.Transform.Get(e),
+		cols: cols,
+		rows: rows,
+		grid: grid,
 	}
 }
 
@@ -57,114 +55,6 @@ func (g *Grid) Start(w donburi.World) {
 		g.grid[col][row] = e
 	}
 }
-
-// func (g *Grid) Update(_ donburi.World) {
-// 	if g.tween == nil {
-// 		return
-// 	}
-
-// 	nextRotation := g.tween.Update()
-// 	g.t.LocalRotation = nextRotation
-// 	if g.tween.Done() {
-// 		g.t.LocalRotation = g.tween.End()
-// 		g.player.inputDisabled = false
-// 		g.inputDisabled = false
-// 		g.tween = nil
-// 	}
-// }
-
-// func (g *Grid) OnInput(inputEventType component.InputEventType) {
-// 	if g.inputDisabled {
-// 		return
-// 	}
-
-// 	// TODO - move this into OnStartedStickyTranslation
-// 	// TODO - wire everything up to use the new sticky_translation.go script
-// 	var nextTween *tween.Float64
-// 	if inputEventType == component.InputEventTypeRotateLeft {
-// 		nextTween = tween.NewFloat64(1000*time.Millisecond, g.t.LocalRotation, g.t.LocalRotation-90, tween.EaseInOutCubic)
-// 	} else if inputEventType == component.InputEventTypeRotateBehind {
-// 		nextTween = tween.NewFloat64(1000*time.Millisecond, g.t.LocalRotation, g.t.LocalRotation-180, tween.EaseInOutCubic)
-// 	} else {
-// 		return // exit early because it's not input grid cares about
-// 	}
-
-// 	// instantiate next grid
-// 	nextGrid := make([][]*component.CellData, g.cols)
-// 	for i := 0; i < g.cols; i++ {
-// 		nextGrid[i] = make([]*component.CellData, g.rows)
-// 		for j := 0; j < g.rows; j++ {
-// 			s := g.grid[i][j]
-// 			if s == nil || s.IsSticky {
-// 				continue
-// 			}
-
-// 			nextGrid[i][j] = s
-// 		}
-// 	}
-
-// 	// fill up next grid with translated cells
-// 	for i := 0; i < g.cols; i++ {
-// 		for j := 0; j < g.rows; j++ {
-// 			s := g.grid[i][j]
-// 			if s == nil || !s.IsSticky {
-// 				continue
-// 			}
-
-// 			x := j
-// 			y := g.cols - 1 - i
-// 			if inputEventType == component.InputEventTypeRotateBehind {
-// 				x = g.cols - 1 - i
-// 				y = g.rows - 1 - j
-// 			}
-// 			nextGrid[x][y] = s
-// 		}
-// 	}
-
-// 	// compare next grid with current grid for invalid conflicts
-// 	hasConflict := false
-// 	for i := 0; i < g.cols; i++ {
-// 		for j := 0; j < g.rows; j++ {
-// 			curr := g.grid[i][j]
-// 			next := nextGrid[i][j]
-
-// 			if curr == nil || next == nil || curr == next || curr.IsSticky == next.IsSticky {
-// 				continue
-// 			}
-
-// 			if !(curr.Type == component.CellTypeGoal && next.Type == component.CellTypePlayer) {
-// 				hasConflict = true
-// 				break
-// 			}
-// 		}
-
-// 		if hasConflict {
-// 			break
-// 		}
-// 	}
-
-// 	if !hasConflict {
-// 		// apply translation
-// 		for i := 0; i < g.cols; i++ {
-// 			for j := 0; j < g.rows; j++ {
-// 				s := nextGrid[i][j]
-// 				if s == nil {
-// 					continue
-// 				}
-
-// 				pos := engine.IndexToVec2(i, j)
-// 				s.QueuedPosition = &pos
-// 			}
-// 		}
-
-// 		g.grid = nextGrid
-// 		g.tween = nextTween
-// 		g.player.inputDisabled = true
-// 		g.inputDisabled = true
-// 	} else {
-// 		g.audioQueue.Enqueue(assets.SFXBadMove)
-// 	}
-// }
 
 func (g *Grid) OnStartedStickyTranslation(w donburi.World, eventData event.StartedStickyTranslationData) {
 	rotationDegrees := 90.0

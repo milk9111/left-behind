@@ -3,6 +3,7 @@ package scripts
 import (
 	"time"
 
+	"github.com/milk9111/left-behind/assets"
 	"github.com/milk9111/left-behind/component"
 	"github.com/milk9111/left-behind/engine"
 	"github.com/milk9111/left-behind/engine/tween"
@@ -14,16 +15,20 @@ import (
 )
 
 type StickyTranslation struct {
-	query *donburi.Query
+	e          *donburi.Entry
+	query      *donburi.Query
+	audioQueue *component.AudioQueueData
 
 	grid                 *Grid
 	player               *Player
 	globalTweenVec2Queue *component.TweenVec2QueueData
 }
 
-func NewStickyTranslation() *StickyTranslation {
+func NewStickyTranslation(e *donburi.Entry) *StickyTranslation {
 	return &StickyTranslation{
-		query: donburi.NewQuery(filter.Contains(component.Sticky, component.Cell, transform.Transform)),
+		e:          e,
+		query:      donburi.NewQuery(filter.Contains(component.Sticky, component.Cell, transform.Transform)),
+		audioQueue: component.AudioQueue.Get(e),
 	}
 }
 
@@ -77,7 +82,7 @@ func (s *StickyTranslation) OnInput(w donburi.World, inputEventType component.In
 			return
 		}
 
-		nextCell := component.Cell.Get(e)
+		nextCell := component.Cell.Get(nextCellEntry)
 		if (cell.Type == component.CellTypeGoal || cell.Type == component.CellTypePlayer) &&
 			(nextCell.Type == component.CellTypeGoal || nextCell.Type == component.CellTypePlayer) { // player and goal are colliding so no conflict
 			// TODO - trigger win event here?
@@ -89,6 +94,7 @@ func (s *StickyTranslation) OnInput(w donburi.World, inputEventType component.In
 
 	if hasConflict {
 		// TODO - trigger failure event, could be an animation and sfx
+		s.audioQueue.Enqueue(assets.SFXBadMove)
 		return
 	}
 

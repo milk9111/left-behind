@@ -4,7 +4,6 @@ import (
 	"flag"
 	"log"
 
-	"github.com/milk9111/left-behind/assets"
 	"github.com/milk9111/left-behind/component"
 	"github.com/milk9111/left-behind/scene"
 
@@ -94,13 +93,20 @@ func NewGame(config Config) *Game {
 		worldHeight:  config.WorldHeight,
 		screenWidth:  config.ScreenWidth,
 		screenHeight: config.ScreenHeight,
-		scene: scene.NewGame(
+		// scene: scene.NewGame(
+		// 	&component.GameData{
+		// 		WorldWidth:  config.WorldWidth,
+		// 		WorldHeight: config.WorldHeight,
+		// 		TileSize:    32,
+		// 	},
+		// 	assets.StartingLevel(),
+		// ),
+		scene: scene.NewMainMenu(
 			&component.GameData{
 				WorldWidth:  config.WorldWidth,
 				WorldHeight: config.WorldHeight,
 				TileSize:    32,
 			},
-			assets.StartingLevel(),
 		),
 	}
 }

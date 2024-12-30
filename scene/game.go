@@ -49,6 +49,7 @@ func NewGame(game *component.GameData, level *assets.Level) *Game {
 
 func (g *Game) loadLevel() {
 	render := system.NewRender(g.game.WorldWidth, g.game.WorldHeight)
+	ui := system.NewUI()
 	g.inputSystem = system.NewInput()
 
 	g.systems = []System{
@@ -59,10 +60,12 @@ func (g *Game) loadLevel() {
 		system.NewProcessEvents(),
 		system.NewAudio(),
 		render,
+		ui, // doesn't matter where ui is in this order
 	}
 
 	g.drawables = []Drawable{
 		render,
+		ui, // ui needs to draw after render
 	}
 
 	g.world = g.createWorld()
@@ -85,6 +88,8 @@ func (g *Game) createWorld() donburi.World {
 	component.TweenVec2Queue.SetValue(vec2Queue, component.TweenVec2QueueData{
 		Queue: engine.NewQueue[*tween.Vec2](),
 	})
+
+	archetype.NewUI(w, g.level.Name)
 
 	archetype.NewGrid(w, g.game, g.level.Cols, g.level.Rows)
 

@@ -7,7 +7,6 @@ import (
 	"github.com/milk9111/left-behind/assets"
 	"github.com/milk9111/left-behind/assets/scripts"
 	"github.com/milk9111/left-behind/component"
-	"github.com/milk9111/left-behind/engine"
 	"github.com/milk9111/left-behind/event"
 	"github.com/yohamta/donburi"
 	dmath "github.com/yohamta/donburi/features/math"
@@ -20,11 +19,8 @@ func NewGrid(w donburi.World, game *component.GameData, cols, rows int) *donburi
 		w.Create(
 			transform.Transform,
 			component.Sprite,
-			// component.InputHandler,
-			// component.Update,
 			component.Start,
 			scripts.GridComponent,
-			component.AudioQueue,
 		),
 	)
 
@@ -66,19 +62,7 @@ func NewGrid(w donburi.World, game *component.GameData, cols, rows int) *donburi
 		Hidden: false,
 	})
 
-	component.AudioQueue.SetValue(e, component.AudioQueueData{
-		Queue: engine.NewQueue[[]byte](),
-	})
-
 	grid := scripts.NewGrid(e, cols, rows)
-
-	// component.InputHandler.SetValue(e, component.InputHandlerData{
-	// 	Handler: grid,
-	// })
-
-	// component.Update.SetValue(e, component.UpdateData{
-	// 	Handler: grid,
-	// })
 
 	component.Start.SetValue(e, component.StartData{
 		Handler: grid,
