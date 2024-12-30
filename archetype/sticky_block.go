@@ -16,6 +16,7 @@ func NewStickyBlock(w donburi.World, position dmath.Vec2) *donburi.Entry {
 		component.Cell,
 		scripts.StaticComponent,
 		component.Start,
+		component.Sticky,
 	))
 
 	component.Sprite.SetValue(e, component.SpriteData{
@@ -25,8 +26,11 @@ func NewStickyBlock(w donburi.World, position dmath.Vec2) *donburi.Entry {
 
 	component.Cell.SetValue(e, component.CellData{
 		Position: position,
-		IsSticky: true,
 		Type:     component.CellTypeStickyBlock,
+	})
+
+	component.Sticky.SetValue(e, component.StickyData{
+		Disabled: false,
 	})
 
 	static := scripts.NewStatic(e)

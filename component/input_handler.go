@@ -13,7 +13,7 @@ const (
 )
 
 type inputHandler interface {
-	OnInput(InputEventType)
+	OnInput(donburi.World, InputEventType)
 }
 
 type InputHandlerData struct {

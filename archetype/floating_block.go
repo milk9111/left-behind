@@ -16,6 +16,7 @@ func NewFloatingBlock(w donburi.World, position dmath.Vec2) *donburi.Entry {
 		component.Cell,
 		scripts.StaticComponent,
 		component.Start,
+		component.Sticky,
 	))
 
 	component.Sprite.SetValue(e, component.SpriteData{
@@ -25,8 +26,11 @@ func NewFloatingBlock(w donburi.World, position dmath.Vec2) *donburi.Entry {
 
 	component.Cell.SetValue(e, component.CellData{
 		Position: position,
-		IsSticky: false,
 		Type:     component.CellTypeFloatingBlock,
+	})
+
+	component.Sticky.SetValue(e, component.StickyData{
+		Disabled: true,
 	})
 
 	static := scripts.NewStatic(e)

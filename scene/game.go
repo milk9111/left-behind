@@ -5,6 +5,8 @@ import (
 	"github.com/milk9111/left-behind/archetype"
 	"github.com/milk9111/left-behind/assets"
 	"github.com/milk9111/left-behind/component"
+	"github.com/milk9111/left-behind/engine"
+	"github.com/milk9111/left-behind/engine/tween"
 	"github.com/milk9111/left-behind/event"
 	"github.com/milk9111/left-behind/system"
 	"github.com/yohamta/donburi"
@@ -30,6 +32,8 @@ type Game struct {
 	systems     []System
 	drawables   []Drawable
 	debuggables []Debuggable
+
+	inputSystem *system.Input
 }
 
 func NewGame(game *component.GameData, level *assets.Level) *Game {
@@ -45,11 +49,13 @@ func NewGame(game *component.GameData, level *assets.Level) *Game {
 
 func (g *Game) loadLevel() {
 	render := system.NewRender(g.game.WorldWidth, g.game.WorldHeight)
+	g.inputSystem = system.NewInput()
 
 	g.systems = []System{
-		system.NewInput(),
+		g.inputSystem,
 		system.NewUpdate(),
-		system.NewSticky(),
+		// system.NewSticky(),
+		system.NewProcessTweens(),
 		system.NewProcessEvents(),
 		system.NewAudio(),
 		render,
@@ -70,6 +76,16 @@ func (g *Game) createWorld() donburi.World {
 	game := w.Entry(w.Create(component.Game))
 	component.Game.Set(game, g.game)
 
+	f64Queue := w.Entry(w.Create(component.TweenFloat64Queue))
+	component.TweenFloat64Queue.SetValue(f64Queue, component.TweenFloat64QueueData{
+		Queue: engine.NewQueue[*tween.Float64](),
+	})
+
+	vec2Queue := w.Entry(w.Create(component.TweenVec2Queue))
+	component.TweenVec2Queue.SetValue(vec2Queue, component.TweenVec2QueueData{
+		Queue: engine.NewQueue[*tween.Vec2](),
+	})
+
 	archetype.NewGrid(w, g.game, g.level.Cols, g.level.Rows)
 
 	archetype.NewPlayer(w, g.level.PlayerPosition())
@@ -77,6 +93,8 @@ func (g *Game) createWorld() donburi.World {
 	archetype.NewGoal(w, g.level.GoalPosition())
 
 	archetype.NewLevelTransition(w)
+
+	archetype.NewStickyTranslation(w)
 
 	for _, pos := range g.level.StickyBlockPositions() {
 		archetype.NewStickyBlock(w, pos)
@@ -86,6 +104,10 @@ func (g *Game) createWorld() donburi.World {
 		archetype.NewFloatingBlock(w, pos)
 	}
 
+	event.StartedPlayerMove.Subscribe(w, g.OnStartedPlayerMove)
+	event.FinishedPlayerMove.Subscribe(w, g.OnFinishedPlayerMove)
+	event.StartedStickyTranslation.Subscribe(w, g.OnStartedStickyTranslation)
+	event.FinishedStickyTranslation.Subscribe(w, g.OnFinishedStickyTranslation)
 	event.FinishedLevelTransition.Subscribe(w, g.OnFinishedLevelTransition)
 
 	return w
@@ -102,8 +124,22 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	for _, d := range g.drawables {
 		d.Draw(g.world, screen)
 	}
+}
 
-	// TODO - run DebugDraw
+func (g *Game) OnStartedPlayerMove(_ donburi.World, _ event.StartedPlayerMoveData) {
+	g.inputSystem.SetDisabled(true)
+}
+
+func (g *Game) OnFinishedPlayerMove(_ donburi.World, _ event.FinishedPlayerMoveData) {
+	g.inputSystem.SetDisabled(false)
+}
+
+func (g *Game) OnStartedStickyTranslation(_ donburi.World, _ event.StartedStickyTranslationData) {
+	g.inputSystem.SetDisabled(true)
+}
+
+func (g *Game) OnFinishedStickyTranslation(_ donburi.World, _ event.FinishedStickyTranslationData) {
+	g.inputSystem.SetDisabled(false)
 }
 
 func (g *Game) OnFinishedLevelTransition(_ donburi.World, _ event.FinishedLevelTransitionData) {

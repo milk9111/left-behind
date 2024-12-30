@@ -4,6 +4,7 @@ import (
 	"github.com/milk9111/left-behind/assets"
 	"github.com/milk9111/left-behind/assets/scripts"
 	"github.com/milk9111/left-behind/component"
+	"github.com/milk9111/left-behind/engine"
 	"github.com/milk9111/left-behind/event"
 	"github.com/yohamta/donburi"
 	dmath "github.com/yohamta/donburi/features/math"
@@ -20,6 +21,7 @@ func NewPlayer(w donburi.World, position dmath.Vec2) *donburi.Entry {
 		component.Update,
 		component.Cell,
 		component.AudioQueue,
+		component.Sticky,
 	))
 
 	transform.Transform.Get(e).LocalPosition = position
@@ -27,6 +29,14 @@ func NewPlayer(w donburi.World, position dmath.Vec2) *donburi.Entry {
 	component.Sprite.SetValue(e, component.SpriteData{
 		Image: assets.SpriteTestPlayer,
 		Layer: component.SpriteLayerEntity,
+	})
+
+	component.AudioQueue.SetValue(e, component.AudioQueueData{
+		Queue: engine.NewQueue[[]byte](),
+	})
+
+	component.Sticky.SetValue(e, component.StickyData{
+		Disabled: false,
 	})
 
 	player := scripts.NewPlayer(e)
@@ -45,7 +55,6 @@ func NewPlayer(w donburi.World, position dmath.Vec2) *donburi.Entry {
 
 	component.Cell.SetValue(e, component.CellData{
 		Position: position,
-		IsSticky: true,
 		Type:     component.CellTypePlayer,
 	})
 

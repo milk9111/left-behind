@@ -16,6 +16,7 @@ func NewGoal(w donburi.World, position dmath.Vec2) *donburi.Entry {
 		component.Cell,
 		component.Start,
 		component.TagGoal,
+		component.Sticky,
 		scripts.StaticComponent,
 	))
 
@@ -23,13 +24,16 @@ func NewGoal(w donburi.World, position dmath.Vec2) *donburi.Entry {
 
 	component.Cell.SetValue(e, component.CellData{
 		Position: position,
-		IsSticky: false,
 		Type:     component.CellTypeGoal,
 	})
 
 	component.Sprite.SetValue(e, component.SpriteData{
 		Image: assets.SpriteGoal,
 		Layer: component.SpriteLayerEntity,
+	})
+
+	component.Sticky.SetValue(e, component.StickyData{
+		Disabled: true,
 	})
 
 	static := scripts.NewStatic(e)

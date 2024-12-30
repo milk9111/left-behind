@@ -18,12 +18,11 @@ type Player struct {
 	cell       *component.CellData
 	audioQueue *component.AudioQueueData
 
-	grid *Grid
-	goal *transform.TransformData
+	grid                 *Grid
+	goal                 *transform.TransformData
+	globalTweenVec2Queue *component.TweenVec2QueueData
 
-	tween         *tween.Vec2
-	inputDisabled bool // I might be better off disabling the system instead
-	goalReached   bool
+	goalReached bool
 }
 
 func NewPlayer(e *donburi.Entry) *Player {
@@ -38,6 +37,7 @@ func NewPlayer(e *donburi.Entry) *Player {
 func (p *Player) Start(w donburi.World) {
 	p.grid = GridComponent.Get(MustFindEntry(w, GridComponent))
 	p.goal = transform.Transform.Get(MustFindEntry(w, component.TagGoal))
+	p.globalTweenVec2Queue = component.MustFindTweenVec2Queue(w)
 
 	p.t.LocalPosition = p.grid.t.LocalPosition.Add(p.cell.Position)
 }
@@ -47,27 +47,9 @@ func (p *Player) Update(w donburi.World) {
 		p.goalReached = true
 		event.ReachedGoal.Publish(w, event.ReachedGoalData{})
 	}
-
-	if p.tween == nil {
-		return
-	}
-
-	p.cell.Position = p.tween.Update()
-	p.t.LocalPosition = p.grid.t.LocalPosition.Add(p.cell.Position)
-	if p.tween.Done() {
-		p.cell.Position = p.tween.End()
-		p.t.LocalPosition = p.grid.t.LocalPosition.Add(p.cell.Position)
-		p.grid.inputDisabled = false
-		p.inputDisabled = false
-		p.tween = nil
-	}
 }
 
-func (p *Player) OnInput(inputEventType component.InputEventType) {
-	if (p.tween != nil && !p.tween.Done()) || p.inputDisabled {
-		return
-	}
-
+func (p *Player) OnInput(w donburi.World, inputEventType component.InputEventType) {
 	var nextPos dmath.Vec2
 	if inputEventType == component.InputEventTypeMoveLeft {
 		nextPos = p.cell.Position.Add(dmath.NewVec2(-32, 0))
@@ -85,10 +67,25 @@ func (p *Player) OnInput(inputEventType component.InputEventType) {
 		return // exit early because it's not input player cares about
 	}
 
-	p.tween = tween.NewVec2(250*time.Millisecond, p.cell.Position, nextPos, tween.EaseInOutCubic)
+	vec2Tween := tween.NewVec2(
+		w,
+		250*time.Millisecond,
+		p.cell.Position,
+		nextPos,
+		tween.EaseInOutCubic,
+		tween.WithVec2UpdateCallback(func(t dmath.Vec2) {
+			p.cell.Position = t
+			p.t.LocalPosition = p.grid.t.LocalPosition.Add(p.cell.Position)
+		}),
+	)
+
+	vec2Tween.FinishedEvent.Subscribe(w, func(w donburi.World, _ tween.FinishedEventData) {
+		event.FinishedPlayerMove.Publish(w, event.FinishedPlayerMoveData{})
+	})
+
+	p.globalTweenVec2Queue.Enqueue(vec2Tween)
 	p.grid.Move(p.cell.Position, nextPos)
-	p.grid.inputDisabled = true
-	p.inputDisabled = true
+	event.StartedPlayerMove.Publish(w, event.StartedPlayerMoveData{})
 }
 
 func (p *Player) HasReachedGoal() bool {
@@ -96,7 +93,6 @@ func (p *Player) HasReachedGoal() bool {
 }
 
 func (p *Player) OnReachedGoal(_ donburi.World, _ event.ReachedGoalData) {
-	p.inputDisabled = true
 	p.audioQueue.Enqueue(assets.SFXGoalReached)
 }
 

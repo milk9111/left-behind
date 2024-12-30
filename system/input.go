@@ -9,7 +9,8 @@ import (
 )
 
 type Input struct {
-	query *donburi.Query
+	query    *donburi.Query
+	disabled bool
 }
 
 func NewInput() *Input {
@@ -21,6 +22,10 @@ func NewInput() *Input {
 }
 
 func (i *Input) Update(w donburi.World) {
+	if i.disabled {
+		return
+	}
+
 	var inputEventType component.InputEventType
 	if inpututil.IsKeyJustPressed(ebiten.KeyA) {
 		inputEventType = component.InputEventTypeMoveLeft
@@ -35,6 +40,10 @@ func (i *Input) Update(w donburi.World) {
 	}
 
 	i.query.Each(w, func(e *donburi.Entry) {
-		component.InputHandler.Get(e).Handler.OnInput(inputEventType)
+		component.InputHandler.Get(e).Handler.OnInput(w, inputEventType)
 	})
+}
+
+func (i *Input) SetDisabled(disabled bool) {
+	i.disabled = disabled
 }
