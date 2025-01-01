@@ -2,8 +2,10 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 
+	"github.com/milk9111/left-behind/assets"
 	"github.com/milk9111/left-behind/component"
 	"github.com/milk9111/left-behind/scene"
 
@@ -50,7 +52,7 @@ func main() {
 	// 	panic(err)
 	// }
 
-	ebiten.SetWindowTitle("Left Behind")
+	ebiten.SetWindowTitle("Trixie the Truffler")
 	// ebiten.SetWindowIcon([]image.Image{
 	// 	icon16x16,
 	// 	icon32x32,
@@ -67,12 +69,13 @@ func main() {
 }
 
 type Scene interface {
-	Update()
+	Update() scene.Scene
 	Draw(screen *ebiten.Image)
 }
 
 type Game struct {
-	scene        Scene
+	scenes       map[scene.Scene]Scene
+	currentScene scene.Scene
 	worldWidth   int
 	worldHeight  int
 	screenWidth  int
@@ -88,36 +91,48 @@ type Config struct {
 }
 
 func NewGame(config Config) *Game {
+	gameData := &component.GameData{
+		WorldWidth:  config.WorldWidth,
+		WorldHeight: config.WorldHeight,
+		TileSize:    32,
+	}
+
 	return &Game{
 		worldWidth:   config.WorldWidth,
 		worldHeight:  config.WorldHeight,
 		screenWidth:  config.ScreenWidth,
 		screenHeight: config.ScreenHeight,
-		// scene: scene.NewGame(
-		// 	&component.GameData{
-		// 		WorldWidth:  config.WorldWidth,
-		// 		WorldHeight: config.WorldHeight,
-		// 		TileSize:    32,
-		// 	},
-		// 	assets.StartingLevel(),
-		// ),
-		scene: scene.NewMainMenu(
-			&component.GameData{
-				WorldWidth:  config.WorldWidth,
-				WorldHeight: config.WorldHeight,
-				TileSize:    32,
-			},
-		),
+		scenes: map[scene.Scene]Scene{
+			scene.SceneGame: scene.NewGame(
+				gameData,
+				assets.StartingLevel(),
+			),
+			scene.SceneMainMenu: scene.NewMainMenu(
+				gameData,
+			),
+		},
+		currentScene: scene.SceneGame,
 	}
 }
 
 func (g *Game) Update() error {
-	g.scene.Update()
+	sc, ok := g.scenes[g.currentScene]
+	if !ok {
+		panic(fmt.Errorf("invalid scene %d", g.currentScene))
+	}
+
+	g.currentScene = sc.Update()
+
 	return nil
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	g.scene.Draw(screen)
+	sc, ok := g.scenes[g.currentScene]
+	if !ok {
+		panic(fmt.Errorf("invalid scene %d", g.currentScene))
+	}
+
+	sc.Draw(screen)
 }
 
 func (g *Game) Layout(_, _ int) (int, int) {

@@ -10,17 +10,26 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"github.com/milk9111/left-behind/assets"
 	"github.com/milk9111/left-behind/component"
+	"github.com/milk9111/left-behind/engine/ui"
+	"golang.org/x/image/colornames"
 )
 
 type MainMenu struct {
 	ui   *ebitenui.UI
 	game *component.GameData
 
+	nextScene Scene
+
 	backgroundImage *ebiten.Image
 	time            int
 }
 
 func NewMainMenu(game *component.GameData) *MainMenu {
+	m := &MainMenu{
+		game:      game,
+		nextScene: SceneMainMenu,
+	}
+
 	backgroundImage := ebiten.NewImage(game.WorldWidth, game.WorldHeight)
 	widthPiece := game.WorldWidth / 3
 	heightPiece := game.WorldHeight / 3
@@ -101,26 +110,87 @@ func NewMainMenu(game *component.GameData) *MainMenu {
 		widget.TextOpts.Position(widget.TextPositionCenter, widget.TextPositionCenter),
 	)
 
-	// TODO - add button to start game
-
 	titleLabelContainer.AddChild(titleLabel)
 
 	headerContainer.AddChild(titleLabelContainer)
 
 	rootContainer.AddChild(headerContainer)
 
-	return &MainMenu{
-		ui: &ebitenui.UI{
-			Container: rootContainer,
-		},
-		game:            game,
-		backgroundImage: backgroundImage,
+	buttonContainer := widget.NewContainer(
+		widget.ContainerOpts.WidgetOpts(
+			widget.WidgetOpts.LayoutData(widget.RowLayoutData{
+				Stretch: true,
+			}),
+			widget.WidgetOpts.TrackHover(false),
+		),
+		widget.ContainerOpts.Layout(
+			widget.NewAnchorLayout(),
+		),
+	)
+
+	buttonImg := &widget.ButtonImage{
+		Idle:         ui.NewNineSliceColor(colornames.Peru),
+		Hover:        ui.NewNineSliceColor(colornames.Sienna),
+		Pressed:      ui.NewNineSliceColor(colornames.Saddlebrown),
+		PressedHover: ui.NewNineSliceColor(colornames.Chocolate),
+		Disabled:     ui.NewNineSliceColor(colornames.Lightgray),
 	}
+
+	buttonTextColor := &widget.ButtonTextColor{
+		Idle:     colornames.White,
+		Hover:    colornames.White,
+		Pressed:  colornames.White,
+		Disabled: colornames.Black,
+	}
+
+	button := widget.NewButton(
+		widget.ButtonOpts.WidgetOpts(
+			widget.WidgetOpts.LayoutData(
+				widget.AnchorLayoutData{
+					HorizontalPosition: widget.AnchorLayoutPositionCenter,
+					VerticalPosition:   widget.AnchorLayoutPositionStart,
+					StretchHorizontal:  false,
+					StretchVertical:    false,
+				},
+			),
+		),
+		widget.ButtonOpts.Image(buttonImg),
+		widget.ButtonOpts.Text(
+			"Trixie the Truffler",
+			&text.GoTextFace{
+				Source: assets.FontGoregular,
+				Size:   20,
+			},
+			buttonTextColor,
+		),
+		widget.ButtonOpts.TextPadding(widget.Insets{
+			Left:   25,
+			Right:  25,
+			Top:    10,
+			Bottom: 10,
+		}),
+		widget.ButtonOpts.ClickedHandler(func(args *widget.ButtonClickedEventArgs) {
+			m.nextScene = SceneGame
+		}),
+	)
+
+	buttonContainer.AddChild(button)
+
+	rootContainer.AddChild(buttonContainer)
+
+	m.backgroundImage = backgroundImage
+	m.ui = &ebitenui.UI{
+		Container: rootContainer,
+	}
+
+	return m
 }
 
-func (m *MainMenu) Update() {
+func (m *MainMenu) Update() Scene {
 	m.time++
 	m.ui.Update()
+
+	return m.nextScene
 }
 
 func (m *MainMenu) Draw(screen *ebiten.Image) {

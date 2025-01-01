@@ -22,6 +22,8 @@ var (
 	stickyBlock_png []byte
 	//go:embed sprites/floating_block.png
 	floatingBlock_png []byte
+	//go:embed sprites/trixie.png
+	trixie_png []byte
 )
 
 var (
@@ -31,6 +33,7 @@ var (
 	SpriteGoal          *ebiten.Image
 	SpriteStickyBlock   *ebiten.Image
 	SpriteFloatingBlock *ebiten.Image
+	SpriteTrixie        *ebiten.Image
 )
 
 func init() {
@@ -40,6 +43,7 @@ func init() {
 	SpriteGoal = mustImage(goal_png)
 	SpriteStickyBlock = mustImage(stickyBlock_png)
 	SpriteFloatingBlock = mustImage(floatingBlock_png)
+	SpriteTrixie = mustImage(trixie_png)
 }
 
 func mustImage(b []byte) *ebiten.Image {

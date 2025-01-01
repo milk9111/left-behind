@@ -26,8 +26,10 @@ func NewPlayer(w donburi.World, position dmath.Vec2) *donburi.Entry {
 
 	transform.Transform.Get(e).LocalPosition = position
 
+	transform.Transform.Get(e).LocalScale = dmath.NewVec2(0.9, 0.9)
+
 	component.Sprite.SetValue(e, component.SpriteData{
-		Image: assets.SpriteTestPlayer,
+		Image: assets.SpriteTrixie,
 		Layer: component.SpriteLayerEntity,
 	})
 

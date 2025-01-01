@@ -122,6 +122,10 @@ func (s *StickyTranslation) OnInput(w donburi.World, inputEventType component.In
 		)
 
 		vec2Tween.FinishedEvent.Subscribe(w, func(w donburi.World, _ tween.FinishedEventData) {
+			event.FinishedCellMove.Publish(w, event.FinishedCellMoveData{
+				Entry: e,
+			})
+
 			count--
 			if count <= 0 {
 				event.FinishedStickyTranslation.Publish(w, event.FinishedStickyTranslationData{})

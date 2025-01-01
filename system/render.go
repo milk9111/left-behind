@@ -38,8 +38,6 @@ func (r *Render) Update(w donburi.World) {
 func (r *Render) Draw(w donburi.World, screen *ebiten.Image) {
 	r.world.Clear()
 
-	// r.world.Fill(colornames.Red400)
-
 	rsop := &ebiten.DrawRectShaderOptions{}
 	rsop.Uniforms = map[string]any{
 		"Time":       float32(r.time) / 60,

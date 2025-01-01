@@ -65,7 +65,7 @@ func (g *Game) loadLevel() {
 
 	g.drawables = []Drawable{
 		render,
-		ui, // ui needs to draw after render
+		// ui, // ui needs to draw after render
 	}
 
 	g.world = g.createWorld()
@@ -89,7 +89,7 @@ func (g *Game) createWorld() donburi.World {
 		Queue: engine.NewQueue[*tween.Vec2](),
 	})
 
-	archetype.NewUI(w, g.level.Name)
+	archetype.NewUI(w, g.game, g.level.Name)
 
 	archetype.NewGrid(w, g.game, g.level.Cols, g.level.Rows)
 
@@ -118,10 +118,12 @@ func (g *Game) createWorld() donburi.World {
 	return w
 }
 
-func (g *Game) Update() {
+func (g *Game) Update() Scene {
 	for _, s := range g.systems {
 		s.Update(g.world)
 	}
+
+	return SceneGame
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
