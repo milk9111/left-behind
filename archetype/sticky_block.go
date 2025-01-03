@@ -20,7 +20,7 @@ func NewStickyBlock(w donburi.World, position dmath.Vec2) *donburi.Entry {
 	))
 
 	component.Sprite.SetValue(e, component.SpriteData{
-		Image: assets.SpriteStickyBlock,
+		Image: assets.SpriteFloatingBlock,
 		Layer: component.SpriteLayerEntity,
 	})
 

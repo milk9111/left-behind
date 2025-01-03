@@ -4,6 +4,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/milk9111/left-behind/archetype"
 	"github.com/milk9111/left-behind/assets"
+	"github.com/milk9111/left-behind/assets/scripts"
 	"github.com/milk9111/left-behind/component"
 	"github.com/milk9111/left-behind/engine"
 	"github.com/milk9111/left-behind/engine/tween"
@@ -20,20 +21,18 @@ type Drawable interface {
 	Draw(w donburi.World, s *ebiten.Image)
 }
 
-type Debuggable interface {
-	DebugDraw(w donburi.World, s *ebiten.Image)
-}
-
 type Game struct {
 	game  *component.GameData
 	level *assets.Level
 
-	world       donburi.World
-	systems     []System
-	drawables   []Drawable
-	debuggables []Debuggable
+	world     donburi.World
+	systems   []System
+	drawables []Drawable
 
 	inputSystem *system.Input
+
+	nextScene Scene
+	paused    bool
 }
 
 func NewGame(game *component.GameData, level *assets.Level) *Game {
@@ -47,7 +46,13 @@ func NewGame(game *component.GameData, level *assets.Level) *Game {
 	return g
 }
 
+func (g *Game) Init() {
+	g.loadLevel()
+}
+
 func (g *Game) loadLevel() {
+	g.nextScene = SceneGame
+
 	render := system.NewRender(g.game.WorldWidth, g.game.WorldHeight)
 	ui := system.NewUI()
 	g.inputSystem = system.NewInput()
@@ -55,7 +60,6 @@ func (g *Game) loadLevel() {
 	g.systems = []System{
 		g.inputSystem,
 		system.NewUpdate(),
-		// system.NewSticky(),
 		system.NewProcessTweens(),
 		system.NewProcessEvents(),
 		system.NewAudio(),
@@ -65,7 +69,7 @@ func (g *Game) loadLevel() {
 
 	g.drawables = []Drawable{
 		render,
-		// ui, // ui needs to draw after render
+		ui, // ui needs to draw after render
 	}
 
 	g.world = g.createWorld()
@@ -109,11 +113,22 @@ func (g *Game) createWorld() donburi.World {
 		archetype.NewFloatingBlock(w, pos)
 	}
 
+	handleCellConflictEntry := w.Entry(w.Create(component.Start))
+	handleCellConflict := scripts.NewHandleCellConflict()
+
+	component.Start.SetValue(handleCellConflictEntry, component.StartData{
+		Handler: handleCellConflict,
+	})
+
 	event.StartedPlayerMove.Subscribe(w, g.OnStartedPlayerMove)
 	event.FinishedPlayerMove.Subscribe(w, g.OnFinishedPlayerMove)
 	event.StartedStickyTranslation.Subscribe(w, g.OnStartedStickyTranslation)
 	event.FinishedStickyTranslation.Subscribe(w, g.OnFinishedStickyTranslation)
 	event.FinishedLevelTransition.Subscribe(w, g.OnFinishedLevelTransition)
+	event.ConflictedOnCell.Subscribe(w, handleCellConflict.OnConflictedOnCell)
+	event.PausedGame.Subscribe(w, g.OnPausedGame)
+	event.UnpausedGame.Subscribe(w, g.OnUnpausedGame)
+	event.ExitedGame.Subscribe(w, g.OnExitedGame)
 
 	return w
 }
@@ -123,7 +138,7 @@ func (g *Game) Update() Scene {
 		s.Update(g.world)
 	}
 
-	return SceneGame
+	return g.nextScene
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
@@ -134,22 +149,48 @@ func (g *Game) Draw(screen *ebiten.Image) {
 }
 
 func (g *Game) OnStartedPlayerMove(_ donburi.World, _ event.StartedPlayerMoveData) {
+	if g.paused {
+		return
+	}
 	g.inputSystem.SetDisabled(true)
 }
 
 func (g *Game) OnFinishedPlayerMove(_ donburi.World, _ event.FinishedPlayerMoveData) {
+	if g.paused {
+		return
+	}
 	g.inputSystem.SetDisabled(false)
 }
 
 func (g *Game) OnStartedStickyTranslation(_ donburi.World, _ event.StartedStickyTranslationData) {
+	if g.paused {
+		return
+	}
 	g.inputSystem.SetDisabled(true)
 }
 
 func (g *Game) OnFinishedStickyTranslation(_ donburi.World, _ event.FinishedStickyTranslationData) {
+	if g.paused {
+		return
+	}
+	g.inputSystem.SetDisabled(false)
+}
+
+func (g *Game) OnPausedGame(_ donburi.World, _ event.PausedGameData) {
+	g.paused = true
+	g.inputSystem.SetDisabled(true)
+}
+
+func (g *Game) OnUnpausedGame(_ donburi.World, _ event.UnpausedGameData) {
+	g.paused = false
 	g.inputSystem.SetDisabled(false)
 }
 
 func (g *Game) OnFinishedLevelTransition(_ donburi.World, _ event.FinishedLevelTransitionData) {
 	g.level = assets.NextLevel(g.level.Name)
 	g.loadLevel()
+}
+
+func (g *Game) OnExitedGame(_ donburi.World, _ event.ExitedGameData) {
+	g.nextScene = SceneMainMenu
 }

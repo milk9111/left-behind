@@ -186,6 +186,10 @@ func NewMainMenu(game *component.GameData) *MainMenu {
 	return m
 }
 
+func (m *MainMenu) Init() {
+	m.nextScene = SceneMainMenu
+}
+
 func (m *MainMenu) Update() Scene {
 	m.time++
 	m.ui.Update()

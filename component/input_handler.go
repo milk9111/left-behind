@@ -10,6 +10,7 @@ const (
 	InputEventTypeMoveBehind
 	InputEventTypeRotateLeft
 	InputEventTypeRotateBehind
+	InputEventTypePause
 )
 
 type inputHandler interface {

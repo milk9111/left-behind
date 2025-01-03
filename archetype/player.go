@@ -63,6 +63,7 @@ func NewPlayer(w donburi.World, position dmath.Vec2) *donburi.Entry {
 	scripts.PlayerComponent.Set(e, player)
 
 	event.ReachedGoal.Subscribe(w, player.OnReachedGoal)
+	event.FinishedPlayerMove.Subscribe(w, player.OnFinishedPlayerMove)
 
 	return e
 }

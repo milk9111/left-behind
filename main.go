@@ -19,6 +19,7 @@ func init() {
 
 func main() {
 	forceMonitorFlag := flag.Bool("q", false, "force game window to third monitor (for testing)")
+	startingLevelFlag := flag.String("L", "A", "start game at specific level")
 	flag.Parse()
 
 	// couldn't get the screen size to dynamically resize so decided to hardcode it here
@@ -62,7 +63,14 @@ func main() {
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
 	ebiten.MaximizeWindow()
 
-	err := ebiten.RunGame(NewGame(config))
+	var startingLevel *assets.Level
+	if startingLevelFlag != nil {
+		startingLevel = assets.Levels[*startingLevelFlag]
+	} else {
+		startingLevel = assets.StartingLevel()
+	}
+
+	err := ebiten.RunGame(NewGame(startingLevel, config))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -70,6 +78,7 @@ func main() {
 
 type Scene interface {
 	Update() scene.Scene
+	Init()
 	Draw(screen *ebiten.Image)
 }
 
@@ -90,7 +99,7 @@ type Config struct {
 	ScreenHeight int
 }
 
-func NewGame(config Config) *Game {
+func NewGame(startingLevel *assets.Level, config Config) *Game {
 	gameData := &component.GameData{
 		WorldWidth:  config.WorldWidth,
 		WorldHeight: config.WorldHeight,
@@ -105,7 +114,7 @@ func NewGame(config Config) *Game {
 		scenes: map[scene.Scene]Scene{
 			scene.SceneGame: scene.NewGame(
 				gameData,
-				assets.StartingLevel(),
+				startingLevel,
 			),
 			scene.SceneMainMenu: scene.NewMainMenu(
 				gameData,
@@ -121,7 +130,11 @@ func (g *Game) Update() error {
 		panic(fmt.Errorf("invalid scene %d", g.currentScene))
 	}
 
-	g.currentScene = sc.Update()
+	scene := sc.Update()
+	if scene != g.currentScene {
+		g.scenes[scene].Init()
+		g.currentScene = scene
+	}
 
 	return nil
 }

@@ -63,13 +63,15 @@ func (g *Grid) OnStartedStickyTranslation(w donburi.World, eventData event.Start
 	}
 
 	nextTween := tween.NewFloat64(
-		w,
 		1000*time.Millisecond,
 		g.t.LocalRotation,
 		g.t.LocalRotation-rotationDegrees,
 		tween.EaseInOutCubic,
 		tween.WithFloat64UpdateCallback(func(t float64) {
 			g.t.LocalRotation = t
+		}),
+		tween.WithFloat64FinishedCallback(func() {
+			event.RotatedGrid.Publish(w, event.RotatedGridData{})
 		}),
 	)
 
@@ -91,9 +93,15 @@ func (g *Grid) Move(currPos, nextPos dmath.Vec2) {
 	currCol, currRow := engine.Vec2ToIndex(currPos)
 	nextCol, nextRow := engine.Vec2ToIndex(nextPos)
 
-	s := g.grid[currCol][currRow]
-	g.grid[nextCol][nextRow] = s
-	g.grid[currCol][currRow] = nil
+	if next := g.grid[nextCol][nextRow]; next != nil {
+		curr := g.grid[currCol][currRow]
+		g.grid[nextCol][nextRow] = curr
+		g.grid[currCol][currRow] = next
+	} else {
+		curr := g.grid[currCol][currRow]
+		g.grid[nextCol][nextRow] = curr
+		g.grid[currCol][currRow] = nil
+	}
 }
 
 func (g *Grid) Cell(col, row int) *donburi.Entry {

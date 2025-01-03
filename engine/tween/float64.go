@@ -5,26 +5,31 @@ import (
 
 	"github.com/milk9111/left-behind/engine"
 	"github.com/yohamta/donburi"
-	devents "github.com/yohamta/donburi/features/events"
 )
 
 type FinishedEventData struct{}
 
 type Float64 struct {
-	FinishedEvent *devents.EventType[FinishedEventData]
-
-	timer          *engine.Timer
-	start          float64
-	end            float64
-	easing         func(t float64) float64
-	updateCallback func(t float64)
+	timer            *engine.Timer
+	start            float64
+	end              float64
+	easing           func(t float64) float64
+	finishedCallback func()
+	updateCallback   func(t float64)
 }
 
 type float64Options struct {
-	updateCallback func(t float64)
+	finishedCallback func()
+	updateCallback   func(t float64)
 }
 
 type Float64Option func(opts *float64Options)
+
+func WithFloat64FinishedCallback(callback func()) Float64Option {
+	return func(opts *float64Options) {
+		opts.finishedCallback = callback
+	}
+}
 
 func WithFloat64UpdateCallback(callback func(t float64)) Float64Option {
 	return func(opts *float64Options) {
@@ -33,7 +38,6 @@ func WithFloat64UpdateCallback(callback func(t float64)) Float64Option {
 }
 
 func NewFloat64(
-	w donburi.World,
 	duration time.Duration,
 	start, end float64,
 	easing func(t float64) float64,
@@ -45,12 +49,12 @@ func NewFloat64(
 	}
 
 	return &Float64{
-		timer:          engine.NewTimer(duration),
-		start:          start,
-		end:            end,
-		easing:         easing,
-		updateCallback: opts.updateCallback,
-		FinishedEvent:  devents.NewEventType[FinishedEventData](),
+		timer:            engine.NewTimer(duration),
+		start:            start,
+		end:              end,
+		easing:           easing,
+		finishedCallback: opts.finishedCallback,
+		updateCallback:   opts.updateCallback,
 	}
 }
 
@@ -63,7 +67,9 @@ func (t *Float64) Update(w donburi.World) float64 {
 	t.timer.Update()
 
 	if t.timer.IsReady() {
-		t.FinishedEvent.Publish(w, FinishedEventData{})
+		if t.finishedCallback != nil {
+			t.finishedCallback()
+		}
 		next = t.end
 	}
 

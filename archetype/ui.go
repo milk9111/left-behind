@@ -1,17 +1,16 @@
 package archetype
 
 import (
-	"fmt"
-
 	"github.com/ebitenui/ebitenui"
 	"github.com/ebitenui/ebitenui/widget"
+	"github.com/milk9111/left-behind/assets/scripts"
 	"github.com/milk9111/left-behind/component"
 	"github.com/milk9111/left-behind/engine/ui"
 	"github.com/yohamta/donburi"
 )
 
 func NewUI(w donburi.World, game *component.GameData, levelName string) *donburi.Entry {
-	e := w.Entry(w.Create(component.UI))
+	e := w.Entry(w.Create(component.UI, component.Start, component.Update))
 
 	res := ui.LoadResources(&ui.Resources{})
 
@@ -63,20 +62,17 @@ func NewUI(w donburi.World, game *component.GameData, levelName string) *donburi
 		),
 	)
 
+	pauseMenuScript := scripts.NewPauseMenu(pauseMenuRootContainer.GetWidget())
+
 	pauseMenuExitButton := ui.NewButton(
 		res,
 		"Exit",
 		func() {
-			fmt.Println("clicked exit")
+			pauseMenuScript.OnClick(w)
 		},
 	)
 
 	pauseMenuRowContainer.AddChild(pauseMenuExitButton)
-
-	pauseMenuRootContainer.GetWidget().Visibility = widget.Visibility_Hide_Blocking
-
-	// TODO - separate pause menu into its own archetype
-	// TODO - add pause menu script to consume pause/unpause input
 
 	rootUI := &ebitenui.UI{
 		Container: rootContainer,
@@ -84,6 +80,14 @@ func NewUI(w donburi.World, game *component.GameData, levelName string) *donburi
 
 	component.UI.SetValue(e, component.UIData{
 		Container: rootUI,
+	})
+
+	component.Start.SetValue(e, component.StartData{
+		Handler: pauseMenuScript,
+	})
+
+	component.Update.SetValue(e, component.UpdateData{
+		Handler: pauseMenuScript,
 	})
 
 	return e

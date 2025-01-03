@@ -44,13 +44,9 @@ func (s *StickyTranslation) OnInput(w donburi.World, inputEventType component.In
 		return
 	}
 
-	var hasConflict bool
 	stickyCells := make(map[*donburi.Entry]dmath.Vec2)
+	conflictingCells := make(map[*donburi.Entry]struct{})
 	s.query.Each(w, func(e *donburi.Entry) {
-		if hasConflict {
-			return
-		}
-
 		sticky := component.Sticky.Get(e)
 		if sticky.Disabled {
 			return
@@ -89,12 +85,15 @@ func (s *StickyTranslation) OnInput(w donburi.World, inputEventType component.In
 			return
 		}
 
-		hasConflict = true
+		conflictingCells[e] = struct{}{}
+		conflictingCells[nextCellEntry] = struct{}{}
 	})
 
-	if hasConflict {
-		// TODO - trigger failure event, could be an animation and sfx
+	if len(conflictingCells) > 0 {
 		s.audioQueue.Enqueue(assets.SFXBadMove)
+		for e, _ := range conflictingCells {
+			event.ConflictedOnCell.Publish(w, event.ConflictedOnCellData{Entry: e})
+		}
 		return
 	}
 
@@ -104,13 +103,11 @@ func (s *StickyTranslation) OnInput(w donburi.World, inputEventType component.In
 
 	count := len(stickyCells)
 	for e, pos := range stickyCells {
-		t := transform.Transform.Get(e)
+
 		cell := component.Cell.Get(e)
 
-		s.grid.Move(cell.Position, pos)
-
+		t := transform.Transform.Get(e)
 		vec2Tween := tween.NewVec2(
-			w,
 			1000*time.Millisecond,
 			cell.Position,
 			pos,
@@ -119,18 +116,21 @@ func (s *StickyTranslation) OnInput(w donburi.World, inputEventType component.In
 				cell.Position = v
 				t.LocalPosition = s.grid.t.LocalPosition.Add(cell.Position)
 			}),
+			tween.WithVec2FinishedCallback(func() {
+				event.FinishedCellMove.Publish(w, event.FinishedCellMoveData{
+					Entry: e,
+				})
+
+				if cell.Type == component.CellTypePlayer {
+					event.FinishedPlayerMove.Publish(w, event.FinishedPlayerMoveData{})
+				}
+
+				count--
+				if count <= 0 {
+					event.FinishedStickyTranslation.Publish(w, event.FinishedStickyTranslationData{})
+				}
+			}),
 		)
-
-		vec2Tween.FinishedEvent.Subscribe(w, func(w donburi.World, _ tween.FinishedEventData) {
-			event.FinishedCellMove.Publish(w, event.FinishedCellMoveData{
-				Entry: e,
-			})
-
-			count--
-			if count <= 0 {
-				event.FinishedStickyTranslation.Publish(w, event.FinishedStickyTranslationData{})
-			}
-		})
 
 		s.globalTweenVec2Queue.Enqueue(vec2Tween)
 	}

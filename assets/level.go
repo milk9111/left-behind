@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	//go:embed levels
+	//go:embed all:levels
 	levelsFS embed.FS
 )
 
@@ -32,7 +32,7 @@ func init() {
 			panic(err)
 		}
 
-		if entry.Name() == "config.json" {
+		if entry.Name() == "_config.json" {
 			var conf levelConfig
 			if err := json.Unmarshal(f, &conf); err != nil {
 				panic(err)
