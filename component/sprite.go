@@ -19,16 +19,15 @@ type SpriteData struct {
 	Image  *ebiten.Image
 	Layer  SpriteLayer
 	Hidden bool
-
-	pivot *dmath.Vec2
+	Pivot  *dmath.Vec2
 }
 
 func (s *SpriteData) PivotPoint() dmath.Vec2 {
-	if s.pivot == nil {
-		s.pivot = vec2Ptr(dmath.NewVec2(float64(s.Image.Bounds().Dx())/2, float64(s.Image.Bounds().Dy())/2))
+	if s.Pivot == nil {
+		s.Pivot = vec2Ptr(dmath.NewVec2(0, 0))
 	}
 
-	return *s.pivot
+	return *s.Pivot
 }
 
 var Sprite = donburi.NewComponentType[SpriteData]()

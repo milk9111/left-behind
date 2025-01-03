@@ -1,12 +1,14 @@
 package archetype
 
 import (
+	"image"
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/milk9111/left-behind/assets"
 	"github.com/milk9111/left-behind/assets/scripts"
 	"github.com/milk9111/left-behind/component"
+	"github.com/milk9111/left-behind/engine"
 	"github.com/milk9111/left-behind/event"
 	"github.com/yohamta/donburi"
 	dmath "github.com/yohamta/donburi/features/math"
@@ -32,7 +34,8 @@ func NewGrid(w donburi.World, game *component.GameData, cols, rows int) *donburi
 		float64(game.WorldHeight)/2-(float64(rows)*float64(game.TileSize)*scale.Y)/2,
 	)
 
-	transform.Transform.Get(e).LocalPosition = pos
+	t := transform.Transform.Get(e)
+	t.LocalPosition = pos
 
 	op := &ebiten.DrawImageOptions{}
 	gridImg := ebiten.NewImage(cols*game.TileSize*int(scale.X), rows*game.TileSize*int(scale.Y))
@@ -86,6 +89,97 @@ func NewGrid(w donburi.World, game *component.GameData, cols, rows int) *donburi
 
 	transform.ChangeParent(outline, e, false)
 	transform.Transform.Get(outline).LocalPosition = dmath.NewVec2(-2, -2)
+
+	outlineImgWorldPos := transform.WorldPosition(outline)
+	newBackground(w, game, image.Rect(
+		int(outlineImgWorldPos.X),
+		int(outlineImgWorldPos.Y),
+		int(outlineImgWorldPos.X)+outlineImg.Bounds().Dx(),
+		int(outlineImgWorldPos.Y)+outlineImg.Bounds().Dy(),
+	))
+
+	return e
+}
+
+func newBackground(w donburi.World, game *component.GameData, gridBounds image.Rectangle) *donburi.Entry {
+	e := w.Entry(w.Create(transform.Transform, component.Sprite))
+
+	backgroundImage := ebiten.NewImage(game.WorldWidth, game.WorldHeight)
+	backgroundImage.Fill(colornames.Darkgreen)
+
+	component.Sprite.SetValue(e, component.SpriteData{
+		Image: backgroundImage,
+		Layer: component.SpriteLayerBackground,
+	})
+
+	for _, pos := range engine.PoissonDiskSampling(float64(game.WorldWidth), float64(game.WorldHeight), 30, 200) {
+		x := int(pos.X)
+		y := int(pos.Y)
+
+		intersection := gridBounds.Intersect(image.Rect(x, y, x+game.TileSize, y+game.TileSize))
+		for !intersection.Eq(image.Rectangle{}) {
+			x = engine.RandomRangeInt(0, game.WorldWidth)
+			y = engine.RandomRangeInt(0, game.WorldHeight)
+
+			intersection = gridBounds.Intersect(image.Rect(x, y, x+game.TileSize, y+game.TileSize))
+		}
+
+		newGrass(w, e, dmath.NewVec2(
+			float64(x),
+			float64(y),
+		))
+	}
+
+	treeBounds := assets.SpriteTree.Bounds()
+	for _, pos := range engine.PoissonDiskSampling(float64(game.WorldWidth), float64(game.WorldHeight), 60, 50) {
+		x := int(pos.X)
+		y := int(pos.Y)
+
+		intersection := gridBounds.Intersect(image.Rect(x, y, x+treeBounds.Dx(), y+treeBounds.Dy()))
+		for !intersection.Eq(image.Rectangle{}) {
+			x = engine.RandomRangeInt(0, game.WorldWidth)
+			y = engine.RandomRangeInt(0, game.WorldHeight)
+
+			intersection = gridBounds.Intersect(image.Rect(x, y, x+treeBounds.Dx(), y+treeBounds.Dy()))
+		}
+
+		newTree(w, dmath.NewVec2(
+			float64(x),
+			float64(y),
+		))
+	}
+
+	return e
+}
+
+func newGrass(w donburi.World, parent *donburi.Entry, pos dmath.Vec2) *donburi.Entry {
+	e := w.Entry(w.Create(transform.Transform, component.Sprite))
+
+	transform.ChangeParent(e, parent, false)
+
+	transform.Transform.Get(e).LocalPosition = pos
+
+	component.Sprite.SetValue(e, component.SpriteData{
+		Image: assets.SpriteGrass,
+		Layer: component.SpriteLayerEntity,
+	})
+
+	return e
+}
+
+func newTree(w donburi.World, pos dmath.Vec2) *donburi.Entry {
+	e := w.Entry(w.Create(transform.Transform, component.Sprite))
+
+	transform.Transform.Get(e).LocalPosition = pos
+
+	component.Sprite.SetValue(e, component.SpriteData{
+		Image: assets.SpriteTree,
+		Layer: component.SpriteLayerEntity,
+		Pivot: &dmath.Vec2{
+			X: 16,
+			Y: 48,
+		},
+	})
 
 	return e
 }

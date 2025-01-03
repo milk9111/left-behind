@@ -91,7 +91,7 @@ func (s *StickyTranslation) OnInput(w donburi.World, inputEventType component.In
 
 	if len(conflictingCells) > 0 {
 		s.audioQueue.Enqueue(assets.SFXBadMove)
-		for e, _ := range conflictingCells {
+		for e := range conflictingCells {
 			event.ConflictedOnCell.Publish(w, event.ConflictedOnCellData{Entry: e})
 		}
 		return
@@ -103,8 +103,9 @@ func (s *StickyTranslation) OnInput(w donburi.World, inputEventType component.In
 
 	count := len(stickyCells)
 	for e, pos := range stickyCells {
-
 		cell := component.Cell.Get(e)
+
+		s.grid.Move(cell.Position, pos)
 
 		t := transform.Transform.Get(e)
 		vec2Tween := tween.NewVec2(

@@ -31,6 +31,10 @@ func NewPlayer(w donburi.World, position dmath.Vec2) *donburi.Entry {
 	component.Sprite.SetValue(e, component.SpriteData{
 		Image: assets.SpriteTrixie,
 		Layer: component.SpriteLayerEntity,
+		Pivot: &dmath.Vec2{
+			X: 16,
+			Y: 32,
+		},
 	})
 
 	component.AudioQueue.SetValue(e, component.AudioQueueData{

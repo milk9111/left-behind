@@ -22,6 +22,10 @@ func NewStickyBlock(w donburi.World, position dmath.Vec2) *donburi.Entry {
 	component.Sprite.SetValue(e, component.SpriteData{
 		Image: assets.SpriteFloatingBlock,
 		Layer: component.SpriteLayerEntity,
+		Pivot: &dmath.Vec2{
+			X: 16,
+			Y: 28,
+		},
 	})
 
 	component.Cell.SetValue(e, component.CellData{

@@ -5,7 +5,6 @@ import (
 	"sort"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/milk9111/left-behind/assets"
 	"github.com/milk9111/left-behind/component"
 	"github.com/milk9111/left-behind/engine"
 	"github.com/yohamta/donburi"
@@ -38,12 +37,12 @@ func (r *Render) Update(w donburi.World) {
 func (r *Render) Draw(w donburi.World, screen *ebiten.Image) {
 	r.world.Clear()
 
-	rsop := &ebiten.DrawRectShaderOptions{}
-	rsop.Uniforms = map[string]any{
-		"Time":       float32(r.time) / 60,
-		"Resolution": []float32{float32(r.world.Bounds().Dx()), float32(r.world.Bounds().Dy())},
-	}
-	r.world.DrawRectShader(r.world.Bounds().Dx(), r.world.Bounds().Dy(), assets.ShaderRainbowFlows, rsop)
+	// rsop := &ebiten.DrawRectShaderOptions{}
+	// rsop.Uniforms = map[string]any{
+	// 	"Time":       float32(r.time) / 60,
+	// 	"Resolution": []float32{float32(r.world.Bounds().Dx()), float32(r.world.Bounds().Dy())},
+	// }
+	// r.world.DrawRectShader(r.world.Bounds().Dx(), r.world.Bounds().Dy(), assets.ShaderWindyGrass, rsop)
 
 	var entries []*donburi.Entry
 	r.query.Each(w, func(e *donburi.Entry) {
@@ -79,8 +78,8 @@ func (r *Render) Draw(w donburi.World, screen *ebiten.Image) {
 				return -1
 			}
 
-			aPos := transform.WorldPosition(a)
-			bPos := transform.WorldPosition(b)
+			aPos := transform.WorldPosition(a).Add(aSprite.PivotPoint())
+			bPos := transform.WorldPosition(b).Add(bSprite.PivotPoint())
 
 			return int(aPos.Y - bPos.Y)
 		})

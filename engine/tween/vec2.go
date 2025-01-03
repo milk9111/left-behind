@@ -91,9 +91,9 @@ func NewArcVec2(
 }
 
 func (v *Vec2) Update(w donburi.World) dmath.Vec2 {
-	// if v.timer.IsReady() {
-	// 	return v.end
-	// }
+	if v.timer.IsReady() {
+		return v.end
+	}
 
 	next := v.lerping()
 

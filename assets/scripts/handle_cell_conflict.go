@@ -9,7 +9,6 @@ import (
 	"github.com/milk9111/left-behind/engine/tween"
 	"github.com/milk9111/left-behind/event"
 	"github.com/yohamta/donburi"
-	dmath "github.com/yohamta/donburi/features/math"
 	"github.com/yohamta/donburi/features/transform"
 )
 
@@ -38,7 +37,7 @@ func (h *HandleCellConflict) OnConflictedOnCell(w donburi.World, evt event.Confl
 			component.TagOutline,
 		))
 
-		outlineImg := ebiten.NewImage(sprite.Image.Bounds().Dx()+2, sprite.Image.Bounds().Dy()+2)
+		outlineImg := ebiten.NewImage(sprite.Image.Bounds().Dx(), sprite.Image.Bounds().Dy())
 		outlineImg.Fill(outlineFillColor)
 		component.Sprite.SetValue(outline, component.SpriteData{
 			Image: outlineImg,
@@ -46,7 +45,6 @@ func (h *HandleCellConflict) OnConflictedOnCell(w donburi.World, evt event.Confl
 		})
 
 		transform.ChangeParent(outline, evt.Entry, false)
-		transform.Transform.Get(outline).LocalPosition = dmath.NewVec2(-1, -1)
 	}
 
 	sprite := component.Sprite.Get(outline)
