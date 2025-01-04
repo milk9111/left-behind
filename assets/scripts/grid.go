@@ -3,6 +3,7 @@ package scripts
 import (
 	"time"
 
+	"github.com/milk9111/left-behind/assets"
 	"github.com/milk9111/left-behind/component"
 	"github.com/milk9111/left-behind/engine"
 	"github.com/milk9111/left-behind/engine/tween"
@@ -13,8 +14,9 @@ import (
 )
 
 type Grid struct {
-	e *donburi.Entry
-	t *transform.TransformData
+	e          *donburi.Entry
+	t          *transform.TransformData
+	audioQueue *component.AudioQueueData
 
 	cols int
 	rows int
@@ -35,11 +37,12 @@ func NewGrid(
 	}
 
 	return &Grid{
-		e:    e,
-		t:    transform.Transform.Get(e),
-		cols: cols,
-		rows: rows,
-		grid: grid,
+		e:          e,
+		t:          transform.Transform.Get(e),
+		audioQueue: component.AudioQueue.Get(e),
+		cols:       cols,
+		rows:       rows,
+		grid:       grid,
 	}
 }
 
@@ -58,9 +61,13 @@ func (g *Grid) Start(w donburi.World) {
 
 func (g *Grid) OnStartedStickyTranslation(w donburi.World, eventData event.StartedStickyTranslationData) {
 	rotationDegrees := 90.0
+	audioClip := assets.SFXRotateLeft
 	if eventData.IsRotatingBehind {
 		rotationDegrees = 180
+		audioClip = assets.SFXRotateBehind
 	}
+
+	g.audioQueue.Enqueue(audioClip)
 
 	nextTween := tween.NewFloat64(
 		1000*time.Millisecond,

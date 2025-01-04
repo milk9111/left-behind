@@ -28,6 +28,10 @@ var (
 	tree_png []byte
 	//go:embed sprites/grass.png
 	grass_png []byte
+	//go:embed sprites/grass_tile.png
+	grassTile_png []byte
+	//go:embed sprites/rock.png
+	rock_png []byte
 )
 
 var (
@@ -40,6 +44,8 @@ var (
 	SpriteTrixie        *ebiten.Image
 	SpriteTree          *ebiten.Image
 	SpriteGrass         *ebiten.Image
+	SpriteGrassTile     *ebiten.Image
+	SpriteRock          *ebiten.Image
 )
 
 func init() {
@@ -52,6 +58,8 @@ func init() {
 	SpriteTrixie = mustImage(trixie_png)
 	SpriteTree = mustImage(tree_png)
 	SpriteGrass = mustImage(grass_png)
+	SpriteGrassTile = mustImage(grassTile_png)
+	SpriteRock = mustImage(rock_png)
 }
 
 func mustImage(b []byte) *ebiten.Image {

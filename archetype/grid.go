@@ -23,6 +23,7 @@ func NewGrid(w donburi.World, game *component.GameData, cols, rows int) *donburi
 			component.Sprite,
 			component.Start,
 			scripts.GridComponent,
+			component.AudioQueue,
 		),
 	)
 
@@ -43,10 +44,7 @@ func NewGrid(w donburi.World, game *component.GameData, cols, rows int) *donburi
 	for i := 0; i < cols; i++ {
 		for j := 0; j < rows; j++ {
 			op.GeoM.Reset()
-			spriteImg := assets.SpriteTestCell
-			if (i+j)%2 == 1 {
-				spriteImg = assets.SpriteTestCell2
-			}
+			spriteImg := assets.SpriteGrassTile
 
 			x = math.Max(x, float64(i*spriteImg.Bounds().Dx()*int(scale.X)))
 
@@ -63,6 +61,10 @@ func NewGrid(w donburi.World, game *component.GameData, cols, rows int) *donburi
 		Image:  gridImg,
 		Layer:  component.SpriteLayerBackground,
 		Hidden: false,
+	})
+
+	component.AudioQueue.SetValue(e, component.AudioQueueData{
+		Queue: engine.NewQueue[[]byte](),
 	})
 
 	grid := scripts.NewGrid(e, cols, rows)
