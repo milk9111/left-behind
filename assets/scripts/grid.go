@@ -1,6 +1,7 @@
 package scripts
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/milk9111/left-behind/assets"
@@ -50,6 +51,10 @@ func (g *Grid) Start(w donburi.World) {
 	g.player = MustFindComponent(w, PlayerComponent)
 	g.globalTweenF64Queue = component.MustFindTweenFloat64Queue(w)
 
+	g.GatherCells(w)
+}
+
+func (g *Grid) GatherCells(w donburi.World) {
 	cells := MustFindEntries(w, component.Cell)
 
 	for _, e := range cells {
@@ -85,6 +90,10 @@ func (g *Grid) OnStartedStickyTranslation(w donburi.World, eventData event.Start
 	g.globalTweenF64Queue.Enqueue(nextTween)
 }
 
+func (g *Grid) OnFinishedStickyTranslation(w donburi.World, _ event.FinishedStickyTranslationData) {
+	g.GatherCells(w)
+}
+
 func (g *Grid) CanMove(pos dmath.Vec2) bool {
 	col, row := engine.Vec2ToIndex(pos)
 	if !g.isValidIndex(col, row) {
@@ -96,19 +105,24 @@ func (g *Grid) CanMove(pos dmath.Vec2) bool {
 	return s == nil || component.Cell.Get(s).Type == component.CellTypeGoal
 }
 
-func (g *Grid) Move(currPos, nextPos dmath.Vec2) {
+func (g *Grid) Move(e *donburi.Entry, currPos, nextPos dmath.Vec2) {
+	fmt.Println("Before")
+	g.Print()
+
 	currCol, currRow := engine.Vec2ToIndex(currPos)
 	nextCol, nextRow := engine.Vec2ToIndex(nextPos)
 
-	if next := g.grid[nextCol][nextRow]; next != nil {
-		curr := g.grid[currCol][currRow]
-		g.grid[nextCol][nextRow] = curr
-		g.grid[currCol][currRow] = next
-	} else {
-		curr := g.grid[currCol][currRow]
-		g.grid[nextCol][nextRow] = curr
-		g.grid[currCol][currRow] = nil
-	}
+	g.grid[nextCol][nextRow] = e
+	g.grid[currCol][currRow] = nil
+
+	fmt.Println("After")
+	g.Print()
+}
+
+func (g *Grid) SetCell(e *donburi.Entry, pos dmath.Vec2) {
+	col, row := engine.Vec2ToIndex(pos)
+
+	g.grid[col][row] = e
 }
 
 func (g *Grid) Cell(col, row int) *donburi.Entry {
@@ -119,8 +133,26 @@ func (g *Grid) Cell(col, row int) *donburi.Entry {
 	return g.grid[col][row]
 }
 
+func (g *Grid) Cells() [][]*donburi.Entry {
+	return g.grid
+}
+
 func (g *Grid) isValidIndex(col, row int) bool {
 	return 0 <= col && col < len(g.grid) && 0 <= row && row < len(g.grid[col])
+}
+
+func (g *Grid) Print() {
+	for row := 0; row < g.rows; row++ {
+		for col, entries := range g.grid {
+			if entries[row] == nil {
+				fmt.Printf("|            |")
+				continue
+			}
+
+			fmt.Printf("| (%d,%d) %s %d |", col, row, component.Cell.Get(entries[row]).Type, entries[row].Id())
+		}
+		fmt.Println()
+	}
 }
 
 var GridComponent = donburi.NewComponentType[Grid]()

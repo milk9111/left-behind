@@ -76,6 +76,7 @@ func NewGrid(w donburi.World, game *component.GameData, cols, rows int) *donburi
 	scripts.GridComponent.Set(e, grid)
 
 	event.StartedStickyTranslation.Subscribe(w, grid.OnStartedStickyTranslation)
+	event.FinishedStickyTranslation.Subscribe(w, grid.OnFinishedStickyTranslation)
 
 	outline := w.Entry(w.Create(
 		transform.Transform,

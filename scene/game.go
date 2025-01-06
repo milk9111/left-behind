@@ -18,21 +18,30 @@ type System interface {
 }
 
 type Drawable interface {
-	Draw(w donburi.World, s *ebiten.Image)
+	Draw(w donburi.World, screen *ebiten.Image)
+}
+
+type Debugable interface {
+	DebugDraw(w donburi.World, screen *ebiten.Image)
 }
 
 type Game struct {
 	game  *component.GameData
 	level *assets.Level
 
-	world     donburi.World
-	systems   []System
-	drawables []Drawable
+	world      donburi.World
+	systems    []System
+	drawables  []Drawable
+	debugables []Debugable
 
 	inputSystem *system.Input
 
-	nextScene Scene
-	paused    bool
+	nextScene   Scene
+	paused      bool
+	debugPaused bool // same as paused except doesn't disable input
+	isStepping  bool
+	step        int
+	count       int
 }
 
 func NewGame(game *component.GameData, level *assets.Level) *Game {
@@ -54,6 +63,7 @@ func (g *Game) loadLevel() {
 	g.nextScene = SceneGame
 
 	render := system.NewRender(g.game.WorldWidth, g.game.WorldHeight)
+	debug := system.NewDebug(g.nextStep, g.debugPause)
 	ui := system.NewUI()
 	g.inputSystem = system.NewInput()
 
@@ -65,11 +75,16 @@ func (g *Game) loadLevel() {
 		system.NewAudio(),
 		render,
 		ui, // doesn't matter where ui is in this order
+		debug,
 	}
 
 	g.drawables = []Drawable{
 		render,
 		ui, // ui needs to draw after render
+	}
+
+	g.debugables = []Debugable{
+		debug,
 	}
 
 	g.world = g.createWorld()
@@ -133,10 +148,35 @@ func (g *Game) createWorld() donburi.World {
 	return w
 }
 
+func (g *Game) nextStep() {
+	if !g.debugPaused {
+		return
+	}
+
+	g.isStepping = true
+	g.step = g.count + 1
+}
+
+func (g *Game) debugPause() {
+	g.debugPaused = !g.debugPaused
+}
+
 func (g *Game) Update() Scene {
 	for _, s := range g.systems {
+		if g.debugPaused && !g.isStepping {
+			if _, ok := s.(*system.Debug); !ok {
+				continue
+			}
+		}
+
 		s.Update(g.world)
 	}
+
+	if g.isStepping && g.step == g.count {
+		g.isStepping = false
+	}
+
+	g.count++
 
 	return g.nextScene
 }
@@ -145,6 +185,10 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Clear()
 	for _, d := range g.drawables {
 		d.Draw(g.world, screen)
+	}
+
+	for _, d := range g.debugables {
+		d.DebugDraw(g.world, screen)
 	}
 }
 

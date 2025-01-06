@@ -5,6 +5,7 @@ import (
 
 	"github.com/milk9111/left-behind/assets"
 	"github.com/milk9111/left-behind/component"
+	"github.com/milk9111/left-behind/engine"
 	"github.com/milk9111/left-behind/engine/tween"
 	"github.com/milk9111/left-behind/event"
 	"github.com/yohamta/donburi"
@@ -47,16 +48,18 @@ func (p *Player) Update(w donburi.World) {
 }
 
 func (p *Player) OnInput(w donburi.World, inputEventType component.InputEventType) {
-	var nextPos dmath.Vec2
+	nextCol, nextRow := engine.Vec2ToIndex(p.cell.Position)
 	if inputEventType == component.InputEventTypeMoveLeft {
-		nextPos = p.cell.Position.Add(dmath.NewVec2(-32, 0))
+		nextCol--
 	} else if inputEventType == component.InputEventTypeMoveBehind {
-		nextPos = p.cell.Position.Add(dmath.NewVec2(0, 32))
+		nextRow++
 	} else {
 		return // exit early because it's not input player cares about
 	}
 
 	event.StartedPlayerMove.Publish(w, event.StartedPlayerMoveData{})
+
+	nextPos := engine.IndexToVec2(nextCol, nextRow)
 
 	if !p.grid.CanMove(nextPos) {
 		p.handleBadMove(w, inputEventType)
@@ -78,7 +81,7 @@ func (p *Player) OnInput(w donburi.World, inputEventType component.InputEventTyp
 	)
 
 	p.globalTweenVec2Queue.Enqueue(vec2Tween)
-	p.grid.Move(p.cell.Position, nextPos)
+	p.grid.Move(p.e, p.cell.Position, nextPos)
 }
 
 func (p *Player) OnFinishedPlayerMove(w donburi.World, _ event.FinishedPlayerMoveData) {

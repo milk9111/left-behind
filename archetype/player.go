@@ -22,7 +22,12 @@ func NewPlayer(w donburi.World, position dmath.Vec2) *donburi.Entry {
 		component.Cell,
 		component.AudioQueue,
 		component.Sticky,
+		component.ID,
 	))
+
+	component.ID.SetValue(e, component.IDData{
+		ID: engine.NewID(),
+	})
 
 	transform.Transform.Get(e).LocalPosition = position
 
