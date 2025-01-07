@@ -65,6 +65,10 @@ func (d *Debug) Update(w donburi.World) {
 }
 
 func (d *Debug) DebugDraw(w donburi.World, screen *ebiten.Image) {
+	if d.grid == nil {
+		return
+	}
+
 	d.query.Each(w, func(e *donburi.Entry) {
 		t := transform.Transform.Get(e)
 		sprite := component.Sprite.Get(e)

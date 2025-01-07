@@ -84,7 +84,7 @@ func (g *Game) loadLevel() {
 	}
 
 	g.debugables = []Debugable{
-		debug,
+		//debug,
 	}
 
 	g.world = g.createWorld()

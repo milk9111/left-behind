@@ -28,7 +28,7 @@ func NewGoal(w donburi.World, position dmath.Vec2) *donburi.Entry {
 	})
 
 	component.Sprite.SetValue(e, component.SpriteData{
-		Image: assets.SpriteGoal,
+		Image: assets.SpriteTruffles,
 		Layer: component.SpriteLayerEntity,
 	})
 

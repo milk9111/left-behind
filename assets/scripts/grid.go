@@ -106,17 +106,11 @@ func (g *Grid) CanMove(pos dmath.Vec2) bool {
 }
 
 func (g *Grid) Move(e *donburi.Entry, currPos, nextPos dmath.Vec2) {
-	fmt.Println("Before")
-	g.Print()
-
 	currCol, currRow := engine.Vec2ToIndex(currPos)
 	nextCol, nextRow := engine.Vec2ToIndex(nextPos)
 
 	g.grid[nextCol][nextRow] = e
 	g.grid[currCol][currRow] = nil
-
-	fmt.Println("After")
-	g.Print()
 }
 
 func (g *Grid) SetCell(e *donburi.Entry, pos dmath.Vec2) {

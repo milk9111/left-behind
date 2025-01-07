@@ -128,38 +128,8 @@ func (v *Vec2) Lerp() dmath.Vec2 {
 	return dmath.NewVec2(nextX, nextY)
 }
 
-var midpointWeight = math.Sqrt(2) / 2
-var midpointHeight = 50.0
-
 func (v *Vec2) ArcLerp() dmath.Vec2 {
-	mid := CalculateMidpoint(v.start, v.end, -midpointHeight)
-
-	t := v.timer.PercentDone()
-
-	// Weights for the control points
-	w0 := 1.0            // Weight for the start point
-	w1 := midpointWeight // Weight for the midpoint
-	w2 := 1.0            // Weight for the end point
-
-	// Bézier numerator
-	numeratorX := (1-t)*(1-t)*v.start.X*w0 + 2*(1-t)*t*mid.X*w1 + t*t*v.end.X*w2
-	numeratorY := (1-t)*(1-t)*v.start.Y*w0 + 2*(1-t)*t*mid.Y*w1 + t*t*v.end.Y*w2
-
-	// Bézier denominator
-	denominator := (1-t)*(1-t)*w0 + 2*(1-t)*t*w1 + t*t*w2
-
-	// Rational Bézier point
-	return dmath.NewVec2(
-		numeratorX/denominator,
-		numeratorY/denominator,
-	)
-}
-
-/*func (t *Vec2) ArcLerp() dmath.Vec2 {
 	const height = 8
-
-	midX := (v.start.X + v.end.X) / 2
-	midY := (v.start.Y + v.end.Y) / 2
 
 	dx := v.end.Y - v.start.Y
 	dy := v.start.X - v.end.Y
@@ -169,8 +139,8 @@ func (v *Vec2) ArcLerp() dmath.Vec2 {
 
 	halfLength := math.Sqrt(math.Pow(v.end.X-v.start.X, 2)+math.Pow(v.end.Y-v.start.Y, 2)) / 2
 	radius := math.Sqrt(halfLength*halfLength + height*height)
-	centerX := midX + perpendicularX*(radius-height)
-	centerY := midY + perpendicularY*(radius-height)
+	centerX := perpendicularX * (radius - height)
+	centerY := perpendicularY * (radius - height)
 
 	startAngle := math.Atan2(v.start.Y-centerY, v.start.X-centerX)
 	endAngle := math.Atan2(v.end.Y-centerY, v.end.X-centerX)
@@ -182,7 +152,7 @@ func (v *Vec2) ArcLerp() dmath.Vec2 {
 	}
 
 	return dmath.NewVec2(centerX+radius*math.Cos(angle), centerY+radius*math.Sin(angle))
-}*/
+}
 
 func CalculateMidpoint(start, end dmath.Vec2, height float64) dmath.Vec2 {
 	mid := dmath.Vec2{

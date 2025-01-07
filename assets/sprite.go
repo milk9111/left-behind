@@ -10,21 +10,13 @@ import (
 )
 
 var (
-	//go:embed sprites/test_cell.png
-	testCell_png []byte
-	//go:embed sprites/test_cell_2.png
-	testCell2_png []byte
-	//go:embed sprites/test_player.png
-	testPlayer_png []byte
-	//go:embed sprites/goal.png
-	goal_png []byte
 	//go:embed sprites/sticky_block.png
 	stickyBlock_png []byte
 	//go:embed sprites/floating_block.png
 	floatingBlock_png []byte
-	//go:embed sprites/trixie.png
+	//go:embed sprites/trixie_v2.png
 	trixie_png []byte
-	//go:embed sprites/tree.png
+	//go:embed sprites/tree_v2.png
 	tree_png []byte
 	//go:embed sprites/grass.png
 	grass_png []byte
@@ -32,13 +24,13 @@ var (
 	grassTile_png []byte
 	//go:embed sprites/rock.png
 	rock_png []byte
+	//go:embed sprites/bunny.png
+	bunny_png []byte
+	//go:embed sprites/truffles.png
+	truffles_png []byte
 )
 
 var (
-	SpriteTestCell      *ebiten.Image
-	SpriteTestCell2     *ebiten.Image
-	SpriteTestPlayer    *ebiten.Image
-	SpriteGoal          *ebiten.Image
 	SpriteStickyBlock   *ebiten.Image
 	SpriteFloatingBlock *ebiten.Image
 	SpriteTrixie        *ebiten.Image
@@ -46,13 +38,11 @@ var (
 	SpriteGrass         *ebiten.Image
 	SpriteGrassTile     *ebiten.Image
 	SpriteRock          *ebiten.Image
+	SpriteBunny         *ebiten.Image
+	SpriteTruffles      *ebiten.Image
 )
 
 func init() {
-	SpriteTestCell = mustImage(testCell_png)
-	SpriteTestCell2 = mustImage(testCell2_png)
-	SpriteTestPlayer = mustImage(testPlayer_png)
-	SpriteGoal = mustImage(goal_png)
 	SpriteStickyBlock = mustImage(stickyBlock_png)
 	SpriteFloatingBlock = mustImage(floatingBlock_png)
 	SpriteTrixie = mustImage(trixie_png)
@@ -60,6 +50,8 @@ func init() {
 	SpriteGrass = mustImage(grass_png)
 	SpriteGrassTile = mustImage(grassTile_png)
 	SpriteRock = mustImage(rock_png)
+	SpriteBunny = mustImage(bunny_png)
+	SpriteTruffles = mustImage(truffles_png)
 }
 
 func mustImage(b []byte) *ebiten.Image {
