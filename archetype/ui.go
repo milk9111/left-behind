@@ -1,15 +1,18 @@
 package archetype
 
 import (
+	"fmt"
+
 	"github.com/ebitenui/ebitenui"
 	"github.com/ebitenui/ebitenui/widget"
+	"github.com/milk9111/left-behind/assets"
 	"github.com/milk9111/left-behind/assets/scripts"
 	"github.com/milk9111/left-behind/component"
 	"github.com/milk9111/left-behind/engine/ui"
 	"github.com/yohamta/donburi"
 )
 
-func NewUI(w donburi.World, game *component.GameData, levelName string) *donburi.Entry {
+func NewUI(w donburi.World, game *component.GameData, levelIndex int) *donburi.Entry {
 	e := w.Entry(w.Create(component.UI, component.Start, component.Update))
 
 	res := ui.LoadResources(&ui.Resources{})
@@ -23,7 +26,7 @@ func NewUI(w donburi.World, game *component.GameData, levelName string) *donburi
 	rowContainer.AddChild(levelLabelContainer)
 
 	levelLabel := ui.NewCenteredLabel(
-		levelName,
+		fmt.Sprintf("%d / %d", levelIndex, len(assets.Levels)),
 		res.Font2,
 	)
 	levelLabelContainer.AddChild(levelLabel)

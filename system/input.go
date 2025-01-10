@@ -11,13 +11,16 @@ import (
 type Input struct {
 	query    *donburi.Query
 	disabled bool
+
+	restartLevelCallback func()
 }
 
-func NewInput() *Input {
+func NewInput(restartLevelCallback func()) *Input {
 	return &Input{
 		query: donburi.NewQuery(filter.Contains(
 			component.InputHandler,
 		)),
+		restartLevelCallback: restartLevelCallback,
 	}
 }
 
@@ -35,6 +38,8 @@ func (i *Input) Update(w donburi.World) {
 		inputEventType = component.InputEventTypeRotateLeft
 	} else if inpututil.IsKeyJustPressed(ebiten.KeyArrowDown) {
 		inputEventType = component.InputEventTypeRotateBehind
+	} else if inpututil.IsKeyJustPressed(ebiten.KeyR) {
+		i.restartLevelCallback()
 	} else {
 		return
 	}

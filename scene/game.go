@@ -65,7 +65,7 @@ func (g *Game) loadLevel() {
 	render := system.NewRender(g.game.WorldWidth, g.game.WorldHeight)
 	debug := system.NewDebug(g.nextStep, g.debugPause, g.reloadLevelFile)
 	ui := system.NewUI()
-	g.inputSystem = system.NewInput()
+	g.inputSystem = system.NewInput(g.restartlevel)
 
 	g.systems = []System{
 		g.inputSystem,
@@ -108,7 +108,7 @@ func (g *Game) createWorld() donburi.World {
 		Queue: engine.NewQueue[*tween.Vec2](),
 	})
 
-	archetype.NewUI(w, g.game, g.level.Name)
+	archetype.NewUI(w, g.game, assets.LevelIndex(g.level.Name)+1)
 
 	archetype.NewGrid(w, g.game, g.level.Cols, g.level.Rows)
 
@@ -164,6 +164,10 @@ func (g *Game) debugPause() {
 func (g *Game) reloadLevelFile() {
 	assets.ReloadLevelFile(g.level.Name)
 	g.level = assets.Levels[g.level.Name]
+	g.loadLevel()
+}
+
+func (g *Game) restartlevel() {
 	g.loadLevel()
 }
 

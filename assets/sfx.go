@@ -17,6 +17,8 @@ var (
 	rotateLeft_wav []byte
 	//go:embed sfx/rotate_behind.wav
 	rotateBehind_wav []byte
+	//go:embed sfx/music.wav
+	music_wav []byte
 )
 
 var (
@@ -26,20 +28,23 @@ var (
 	SFXRotateBehind AudioClip
 )
 
+var (
+	Music *wav.Stream
+)
+
 func init() {
 	SFXBadMove = mustAudioClip(badMove_wav)
 	SFXGoalReached = mustAudioClip(goalReached_wav)
 	SFXRotateLeft = mustAudioClip(rotateLeft_wav)
 	SFXRotateBehind = mustAudioClip(rotateBehind_wav)
+
+	Music = mustAudioStream(music_wav)
 }
 
 type AudioClip []byte
 
 func mustAudioClip(b []byte) []byte {
-	m, err := wav.DecodeF32(bytes.NewBuffer(b))
-	if err != nil {
-		panic(err)
-	}
+	m := mustAudioStream(b)
 
 	mb, err := io.ReadAll(m)
 	if err != nil {
@@ -47,4 +52,13 @@ func mustAudioClip(b []byte) []byte {
 	}
 
 	return mb
+}
+
+func mustAudioStream(b []byte) *wav.Stream {
+	m, err := wav.DecodeF32(bytes.NewReader(b))
+	if err != nil {
+		panic(err)
+	}
+
+	return m
 }

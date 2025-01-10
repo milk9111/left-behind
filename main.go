@@ -70,7 +70,17 @@ func main() {
 		startingLevel = assets.StartingLevel()
 	}
 
-	err := ebiten.RunGame(NewGame(startingLevel, config))
+	musicLoop := audio.NewInfiniteLoopWithIntroF32(assets.Music, 0, assets.Music.Length())
+
+	musicPlayer, err := audio.CurrentContext().NewPlayerF32(musicLoop)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	musicPlayer.SetVolume(0.35)
+	musicPlayer.Play()
+
+	err = ebiten.RunGame(NewGame(startingLevel, config))
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -53,6 +53,16 @@ func NextLevel(name string) *Level {
 	return StartingLevel()
 }
 
+func LevelIndex(name string) int {
+	for i, lvl := range LevelConfig.LevelOrder {
+		if name == lvl {
+			return i
+		}
+	}
+
+	return -1
+}
+
 func ReloadLevelFile(levelName string) {
 	f, err := os.Open(fmt.Sprintf("assets/levels/%s.json", strings.ToLower(levelName)))
 	if err != nil {
