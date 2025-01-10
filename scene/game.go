@@ -63,7 +63,7 @@ func (g *Game) loadLevel() {
 	g.nextScene = SceneGame
 
 	render := system.NewRender(g.game.WorldWidth, g.game.WorldHeight)
-	debug := system.NewDebug(g.nextStep, g.debugPause)
+	debug := system.NewDebug(g.nextStep, g.debugPause, g.reloadLevelFile)
 	ui := system.NewUI()
 	g.inputSystem = system.NewInput()
 
@@ -159,6 +159,12 @@ func (g *Game) nextStep() {
 
 func (g *Game) debugPause() {
 	g.debugPaused = !g.debugPaused
+}
+
+func (g *Game) reloadLevelFile() {
+	assets.ReloadLevelFile(g.level.Name)
+	g.level = assets.Levels[g.level.Name]
+	g.loadLevel()
 }
 
 func (g *Game) Update() Scene {

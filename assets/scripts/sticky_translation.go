@@ -105,7 +105,6 @@ func (s *StickyTranslation) OnInput(w donburi.World, inputEventType component.In
 	for e, pos := range stickyCells {
 		cell := component.Cell.Get(e)
 
-		// fmt.Printf("Moving %s\n", cell.Type)
 		s.grid.Move(e, cell.Position, pos)
 
 		t := transform.Transform.Get(e)

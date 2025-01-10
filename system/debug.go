@@ -20,13 +20,14 @@ import (
 type Debug struct {
 	query *donburi.Query
 
-	grid              *scripts.Grid
-	holdStepTimer     *engine.Timer
-	nextStepCallback  func()
-	pauseGameCallback func()
+	grid                    *scripts.Grid
+	holdStepTimer           *engine.Timer
+	nextStepCallback        func()
+	pauseGameCallback       func()
+	reloadLevelFileCallback func()
 }
 
-func NewDebug(nextStepCallback, pauseGameCallback func()) *Debug {
+func NewDebug(nextStepCallback, pauseGameCallback, reloadLevelFileCallback func()) *Debug {
 	return &Debug{
 		query: donburi.NewQuery(
 			filter.Contains(
@@ -35,9 +36,10 @@ func NewDebug(nextStepCallback, pauseGameCallback func()) *Debug {
 				component.Sprite,
 			),
 		),
-		holdStepTimer:     engine.NewTimer(250 * time.Millisecond),
-		nextStepCallback:  nextStepCallback,
-		pauseGameCallback: pauseGameCallback,
+		holdStepTimer:           engine.NewTimer(250 * time.Millisecond),
+		nextStepCallback:        nextStepCallback,
+		pauseGameCallback:       pauseGameCallback,
+		reloadLevelFileCallback: reloadLevelFileCallback,
 	}
 }
 
@@ -61,6 +63,10 @@ func (d *Debug) Update(w donburi.World) {
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
 		d.pauseGameCallback()
+	}
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyF) {
+		d.reloadLevelFileCallback()
 	}
 }
 

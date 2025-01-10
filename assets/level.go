@@ -4,6 +4,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"io"
+	"os"
+	"strings"
 
 	"github.com/milk9111/left-behind/component"
 	"github.com/milk9111/left-behind/engine"
@@ -27,22 +30,7 @@ func init() {
 	}
 
 	for _, entry := range dirEntries {
-		f, err := levelsFS.ReadFile(fmt.Sprintf("levels/%s", entry.Name()))
-		if err != nil {
-			panic(err)
-		}
-
-		if entry.Name() == "_config.json" {
-			var conf levelConfig
-			if err := json.Unmarshal(f, &conf); err != nil {
-				panic(err)
-			}
-
-			LevelConfig = &conf
-		} else {
-			level := mustLevel(f)
-			Levels[level.Name] = level
-		}
+		loadLevelFile(entry.Name())
 	}
 }
 
@@ -63,6 +51,40 @@ func NextLevel(name string) *Level {
 	}
 
 	return StartingLevel()
+}
+
+func ReloadLevelFile(levelName string) {
+	f, err := os.Open(fmt.Sprintf("assets/levels/%s.json", strings.ToLower(levelName)))
+	if err != nil {
+		panic(err)
+	}
+
+	b, err := io.ReadAll(f)
+	if err != nil {
+		panic(err)
+	}
+
+	level := mustLevel(b)
+	Levels[level.Name] = level
+}
+
+func loadLevelFile(fileName string) {
+	f, err := levelsFS.ReadFile(fmt.Sprintf("levels/%s", fileName))
+	if err != nil {
+		panic(err)
+	}
+
+	if fileName == "_config.json" {
+		var conf levelConfig
+		if err := json.Unmarshal(f, &conf); err != nil {
+			panic(err)
+		}
+
+		LevelConfig = &conf
+	} else {
+		level := mustLevel(f)
+		Levels[level.Name] = level
+	}
 }
 
 type Level struct {
