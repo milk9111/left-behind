@@ -46,8 +46,9 @@ type Game struct {
 
 func NewGame(game *component.GameData, level *assets.Level) *Game {
 	g := &Game{
-		game:  game,
-		level: level,
+		game:      game,
+		level:     level,
+		nextScene: SceneGame,
 	}
 
 	g.loadLevel()
@@ -56,12 +57,12 @@ func NewGame(game *component.GameData, level *assets.Level) *Game {
 }
 
 func (g *Game) Init() {
+	g.nextScene = SceneGame
+	g.level = assets.StartingLevel()
 	g.loadLevel()
 }
 
 func (g *Game) loadLevel() {
-	g.nextScene = SceneGame
-
 	render := system.NewRender(g.game.WorldWidth, g.game.WorldHeight)
 	debug := system.NewDebug(g.nextStep, g.debugPause, g.reloadLevelFile)
 	ui := system.NewUI()
@@ -242,6 +243,10 @@ func (g *Game) OnUnpausedGame(_ donburi.World, _ event.UnpausedGameData) {
 
 func (g *Game) OnFinishedLevelTransition(_ donburi.World, _ event.FinishedLevelTransitionData) {
 	g.level = assets.NextLevel(g.level.Name)
+	if assets.LevelIndex(g.level.Name) == 0 {
+		g.nextScene = SceneWin
+	}
+
 	g.loadLevel()
 }
 

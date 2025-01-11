@@ -6,4 +6,5 @@ const (
 	SceneUnknown Scene = iota
 	SceneGame
 	SceneMainMenu
+	SceneWin
 )

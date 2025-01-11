@@ -19,9 +19,6 @@ type MainMenu struct {
 	game *component.GameData
 
 	nextScene Scene
-
-	backgroundImage *ebiten.Image
-	time            int
 }
 
 func NewMainMenu(game *component.GameData) *MainMenu {
@@ -30,12 +27,9 @@ func NewMainMenu(game *component.GameData) *MainMenu {
 		nextScene: SceneMainMenu,
 	}
 
-	backgroundImage := ebiten.NewImage(game.WorldWidth, game.WorldHeight)
-	widthPiece := game.WorldWidth / 3
-	heightPiece := game.WorldHeight / 3
-
 	//This creates the root container for this UI.
 	rootContainer := widget.NewContainer(
+		widget.ContainerOpts.BackgroundImage(image.NewNineSliceColor(assets.ColorCozyGreen)),
 		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.TrackHover(false)),
 		widget.ContainerOpts.Layout(
 			widget.NewGridLayout(
@@ -53,12 +47,6 @@ func NewMainMenu(game *component.GameData) *MainMenu {
 				}),
 				// Spacing defines how much space to put between each column and row
 				widget.GridLayoutOpts.Spacing(0, 20),
-			),
-		),
-		widget.ContainerOpts.BackgroundImage(
-			image.NewNineSlice(backgroundImage,
-				[3]int{widthPiece, widthPiece, widthPiece},
-				[3]int{heightPiece, heightPiece, heightPiece},
 			),
 		),
 	)
@@ -100,7 +88,7 @@ func NewMainMenu(game *component.GameData) *MainMenu {
 			VerticalPosition:   widget.AnchorLayoutPositionStart,
 		})),
 		widget.TextOpts.Text(
-			"Left Behind",
+			"Trixie the Truffler",
 			&text.GoTextFace{
 				Source: assets.FontGoregular,
 				Size:   80,
@@ -156,7 +144,7 @@ func NewMainMenu(game *component.GameData) *MainMenu {
 		),
 		widget.ButtonOpts.Image(buttonImg),
 		widget.ButtonOpts.Text(
-			"Trixie the Truffler",
+			"Start Game",
 			&text.GoTextFace{
 				Source: assets.FontGoregular,
 				Size:   20,
@@ -178,7 +166,6 @@ func NewMainMenu(game *component.GameData) *MainMenu {
 
 	rootContainer.AddChild(buttonContainer)
 
-	m.backgroundImage = backgroundImage
 	m.ui = &ebitenui.UI{
 		Container: rootContainer,
 	}
@@ -191,21 +178,11 @@ func (m *MainMenu) Init() {
 }
 
 func (m *MainMenu) Update() Scene {
-	m.time++
 	m.ui.Update()
 
 	return m.nextScene
 }
 
 func (m *MainMenu) Draw(screen *ebiten.Image) {
-	m.backgroundImage.Clear()
-
-	rsop := &ebiten.DrawRectShaderOptions{}
-	rsop.Uniforms = map[string]any{
-		"Time":       float32(m.time) / 60,
-		"Resolution": []float32{float32(m.backgroundImage.Bounds().Dx()), float32(m.backgroundImage.Bounds().Dy())},
-	}
-	m.backgroundImage.DrawRectShader(m.backgroundImage.Bounds().Dx(), m.backgroundImage.Bounds().Dy(), assets.ShaderRainbowFlows, rsop)
-
 	m.ui.Draw(screen)
 }

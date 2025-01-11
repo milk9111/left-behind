@@ -129,8 +129,11 @@ func NewGame(startingLevel *assets.Level, config Config) *Game {
 			scene.SceneMainMenu: scene.NewMainMenu(
 				gameData,
 			),
+			scene.SceneWin: scene.NewWin(
+				gameData,
+			),
 		},
-		currentScene: scene.SceneGame,
+		currentScene: scene.SceneWin,
 	}
 }
 
