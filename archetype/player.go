@@ -43,7 +43,7 @@ func NewPlayer(w donburi.World, position dmath.Vec2) *donburi.Entry {
 	})
 
 	component.AudioQueue.SetValue(e, component.AudioQueueData{
-		Queue: engine.NewQueue[[]byte](),
+		Queue: engine.NewQueue[*component.AudioQueueEntry](),
 	})
 
 	component.Sticky.SetValue(e, component.StickyData{

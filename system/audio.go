@@ -25,12 +25,12 @@ func (a *Audio) Update(w donburi.World) {
 	a.query.Each(w, func(e *donburi.Entry) {
 		audioQueue := component.AudioQueue.Get(e)
 		for !audioQueue.Empty() {
-			clip := audioQueue.Dequeue()
-			if len(clip) == 0 {
+			entry := audioQueue.Dequeue()
+			if len(entry.Clip) == 0 {
 				continue
 			}
 
-			err := audio.PlayOneShotWav(clip, audio.WithVolume(0.5))
+			err := audio.PlayOneShotWav(entry.Clip, audio.WithVolume(entry.Volume))
 			if err != nil {
 				panic(err)
 			}

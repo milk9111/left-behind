@@ -15,7 +15,7 @@ func NewStickyTranslation(w donburi.World) *donburi.Entry {
 	))
 
 	component.AudioQueue.SetValue(e, component.AudioQueueData{
-		Queue: &engine.Queue[[]byte]{},
+		Queue: &engine.Queue[*component.AudioQueueEntry]{},
 	})
 
 	stickyTranslation := scripts.NewStickyTranslation(e)

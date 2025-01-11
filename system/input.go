@@ -38,8 +38,8 @@ func (i *Input) Update(w donburi.World) {
 		inputEventType = component.InputEventTypeRotateLeft
 	} else if inpututil.IsKeyJustPressed(ebiten.KeyArrowDown) {
 		inputEventType = component.InputEventTypeRotateBehind
-	} else if inpututil.IsKeyJustPressed(ebiten.KeyR) {
-		i.restartLevelCallback()
+		// } else if inpututil.IsKeyJustPressed(ebiten.KeyR) {
+		// 	i.restartLevelCallback()
 	} else {
 		return
 	}

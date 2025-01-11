@@ -64,7 +64,7 @@ func NewGrid(w donburi.World, game *component.GameData, cols, rows int) *donburi
 	})
 
 	component.AudioQueue.SetValue(e, component.AudioQueueData{
-		Queue: engine.NewQueue[[]byte](),
+		Queue: engine.NewQueue[*component.AudioQueueEntry](),
 	})
 
 	grid := scripts.NewGrid(e, cols, rows)

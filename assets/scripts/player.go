@@ -19,6 +19,9 @@ type Player struct {
 	cell       *component.CellData
 	audioQueue *component.AudioQueueData
 
+	badMoveSFX     *component.AudioQueueEntry
+	goalReachedSFX *component.AudioQueueEntry
+
 	grid                 *Grid
 	goal                 *transform.TransformData
 	globalTweenVec2Queue *component.TweenVec2QueueData
@@ -28,10 +31,12 @@ type Player struct {
 
 func NewPlayer(e *donburi.Entry) *Player {
 	return &Player{
-		e:          e,
-		t:          transform.Transform.Get(e),
-		cell:       component.Cell.Get(e),
-		audioQueue: component.AudioQueue.Get(e),
+		e:              e,
+		t:              transform.Transform.Get(e),
+		cell:           component.Cell.Get(e),
+		audioQueue:     component.AudioQueue.Get(e),
+		badMoveSFX:     component.NewAudioQueueEntry(assets.SFXBadMove, 0.5),
+		goalReachedSFX: component.NewAudioQueueEntry(assets.SFXGoalReached, 0.5),
 	}
 }
 
@@ -96,11 +101,11 @@ func (p *Player) HasReachedGoal() bool {
 }
 
 func (p *Player) OnReachedGoal(_ donburi.World, _ event.ReachedGoalData) {
-	p.audioQueue.Enqueue(assets.SFXGoalReached)
+	p.audioQueue.Enqueue(p.goalReachedSFX)
 }
 
 func (p *Player) handleBadMove(w donburi.World, inputEventType component.InputEventType) {
-	p.audioQueue.Enqueue(assets.SFXBadMove)
+	p.audioQueue.Enqueue(p.badMoveSFX)
 
 	var pos dmath.Vec2
 	if inputEventType == component.InputEventTypeMoveLeft {

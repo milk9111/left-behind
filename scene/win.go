@@ -58,7 +58,7 @@ func NewWin(game *component.GameData) *Win {
 		widget.TextOpts.Text(
 			"You Win!",
 			&text.GoTextFace{
-				Source: assets.FontGoregular,
+				Source: assets.FontRoboto,
 				Size:   80,
 			},
 			color.White,
@@ -76,7 +76,7 @@ func NewWin(game *component.GameData) *Win {
 		widget.TextOpts.Text(
 			"Thanks for playing! Taking you back to the Main Menu now.",
 			&text.GoTextFace{
-				Source: assets.FontGoregular,
+				Source: assets.FontRoboto,
 				Size:   20,
 			},
 			colornames.Lightgray,

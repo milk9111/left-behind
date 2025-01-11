@@ -19,6 +19,8 @@ type StickyTranslation struct {
 	query      *donburi.Query
 	audioQueue *component.AudioQueueData
 
+	badMoveSFX *component.AudioQueueEntry
+
 	grid                 *Grid
 	player               *Player
 	globalTweenVec2Queue *component.TweenVec2QueueData
@@ -29,6 +31,7 @@ func NewStickyTranslation(e *donburi.Entry) *StickyTranslation {
 		e:          e,
 		query:      donburi.NewQuery(filter.Contains(component.Sticky, component.Cell, transform.Transform)),
 		audioQueue: component.AudioQueue.Get(e),
+		badMoveSFX: component.NewAudioQueueEntry(assets.SFXBadMove, 0.5),
 	}
 }
 
@@ -90,7 +93,7 @@ func (s *StickyTranslation) OnInput(w donburi.World, inputEventType component.In
 	})
 
 	if len(conflictingCells) > 0 {
-		s.audioQueue.Enqueue(assets.SFXBadMove)
+		s.audioQueue.Enqueue(s.badMoveSFX)
 		for e := range conflictingCells {
 			event.ConflictedOnCell.Publish(w, event.ConflictedOnCellData{Entry: e})
 		}

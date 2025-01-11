@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"image"
 	"log"
 
 	"github.com/milk9111/left-behind/assets"
@@ -30,35 +31,18 @@ func main() {
 		ScreenHeight: 768,
 	}
 
-	// TODO - figure out how to scale sprites properly while keeping this screen size
-
 	// setup has 3 monitors and this forces the game window to open up on the 3rd one
 	monitors := ebiten.AppendMonitors(nil)
 	if forceMonitorFlag != nil && *forceMonitorFlag && len(monitors) == 3 {
 		ebiten.SetMonitor(monitors[2])
 	}
 
-	// icon16x16, _, err := image.Decode(bytes.NewReader(assets.Icon16x16_png))
-	// if err != nil {
-	// 	panic(err)
-	// }
-
-	// icon32x32, _, err := image.Decode(bytes.NewReader(assets.Icon32x32_png))
-	// if err != nil {
-	// 	panic(err)
-	// }
-
-	// icon48x48, _, err := image.Decode(bytes.NewReader(assets.Icon48x48_png))
-	// if err != nil {
-	// 	panic(err)
-	// }
-
 	ebiten.SetWindowTitle("Trixie the Truffler")
-	// ebiten.SetWindowIcon([]image.Image{
-	// 	icon16x16,
-	// 	icon32x32,
-	// 	icon48x48,
-	// })
+	ebiten.SetWindowIcon([]image.Image{
+		assets.SpriteIcon16x16,
+		assets.SpriteTruffles,
+		assets.SpriteIcon48x48,
+	})
 	ebiten.SetWindowSize(config.ScreenWidth, config.ScreenHeight)
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
 	ebiten.MaximizeWindow()
@@ -133,7 +117,7 @@ func NewGame(startingLevel *assets.Level, config Config) *Game {
 				gameData,
 			),
 		},
-		currentScene: scene.SceneGame,
+		currentScene: scene.SceneMainMenu,
 	}
 }
 

@@ -5,8 +5,20 @@ import (
 	"github.com/yohamta/donburi"
 )
 
+type AudioQueueEntry struct {
+	Clip   []byte
+	Volume float64
+}
+
+func NewAudioQueueEntry(clip []byte, volume float64) *AudioQueueEntry {
+	return &AudioQueueEntry{
+		Clip:   clip,
+		Volume: volume,
+	}
+}
+
 type AudioQueueData struct {
-	*engine.Queue[[]byte]
+	*engine.Queue[*AudioQueueEntry]
 }
 
 var AudioQueue = donburi.NewComponentType[AudioQueueData]()

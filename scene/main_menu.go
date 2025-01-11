@@ -11,7 +11,6 @@ import (
 	"github.com/milk9111/left-behind/assets"
 	"github.com/milk9111/left-behind/component"
 	"github.com/milk9111/left-behind/engine/ui"
-	"golang.org/x/image/colornames"
 )
 
 type MainMenu struct {
@@ -90,7 +89,7 @@ func NewMainMenu(game *component.GameData) *MainMenu {
 		widget.TextOpts.Text(
 			"Trixie the Truffler",
 			&text.GoTextFace{
-				Source: assets.FontGoregular,
+				Source: assets.FontRoboto,
 				Size:   80,
 			},
 			color.White,
@@ -109,57 +108,21 @@ func NewMainMenu(game *component.GameData) *MainMenu {
 			widget.WidgetOpts.LayoutData(widget.RowLayoutData{
 				Stretch: true,
 			}),
-			widget.WidgetOpts.TrackHover(false),
 		),
 		widget.ContainerOpts.Layout(
 			widget.NewAnchorLayout(),
 		),
 	)
 
-	buttonImg := &widget.ButtonImage{
-		Idle:         ui.NewNineSliceColor(colornames.Peru),
-		Hover:        ui.NewNineSliceColor(colornames.Sienna),
-		Pressed:      ui.NewNineSliceColor(colornames.Saddlebrown),
-		PressedHover: ui.NewNineSliceColor(colornames.Chocolate),
-		Disabled:     ui.NewNineSliceColor(colornames.Lightgray),
-	}
+	res := &ui.Resources{}
+	res = ui.LoadResources(res)
 
-	buttonTextColor := &widget.ButtonTextColor{
-		Idle:     colornames.White,
-		Hover:    colornames.White,
-		Pressed:  colornames.White,
-		Disabled: colornames.Black,
-	}
-
-	button := widget.NewButton(
-		widget.ButtonOpts.WidgetOpts(
-			widget.WidgetOpts.LayoutData(
-				widget.AnchorLayoutData{
-					HorizontalPosition: widget.AnchorLayoutPositionCenter,
-					VerticalPosition:   widget.AnchorLayoutPositionStart,
-					StretchHorizontal:  false,
-					StretchVertical:    false,
-				},
-			),
-		),
-		widget.ButtonOpts.Image(buttonImg),
-		widget.ButtonOpts.Text(
-			"Start Game",
-			&text.GoTextFace{
-				Source: assets.FontGoregular,
-				Size:   20,
-			},
-			buttonTextColor,
-		),
-		widget.ButtonOpts.TextPadding(widget.Insets{
-			Left:   25,
-			Right:  25,
-			Top:    10,
-			Bottom: 10,
-		}),
-		widget.ButtonOpts.ClickedHandler(func(args *widget.ButtonClickedEventArgs) {
+	button := ui.NewButton(
+		res,
+		"Start Game",
+		func() {
 			m.nextScene = SceneGame
-		}),
+		},
 	)
 
 	buttonContainer.AddChild(button)

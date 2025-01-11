@@ -19,6 +19,9 @@ type Grid struct {
 	t          *transform.TransformData
 	audioQueue *component.AudioQueueData
 
+	rotateLeftSFX   *component.AudioQueueEntry
+	rotateBehindSFX *component.AudioQueueEntry
+
 	cols int
 	rows int
 	grid [][]*donburi.Entry
@@ -38,12 +41,14 @@ func NewGrid(
 	}
 
 	return &Grid{
-		e:          e,
-		t:          transform.Transform.Get(e),
-		audioQueue: component.AudioQueue.Get(e),
-		cols:       cols,
-		rows:       rows,
-		grid:       grid,
+		e:               e,
+		t:               transform.Transform.Get(e),
+		audioQueue:      component.AudioQueue.Get(e),
+		cols:            cols,
+		rows:            rows,
+		grid:            grid,
+		rotateLeftSFX:   component.NewAudioQueueEntry(assets.SFXRotateLeft, 0.75),
+		rotateBehindSFX: component.NewAudioQueueEntry(assets.SFXRotateBehind, 0.5),
 	}
 }
 
@@ -66,10 +71,10 @@ func (g *Grid) GatherCells(w donburi.World) {
 
 func (g *Grid) OnStartedStickyTranslation(w donburi.World, eventData event.StartedStickyTranslationData) {
 	rotationDegrees := 90.0
-	audioClip := assets.SFXRotateLeft
+	audioClip := g.rotateLeftSFX
 	if eventData.IsRotatingBehind {
 		rotationDegrees = 180
-		audioClip = assets.SFXRotateBehind
+		audioClip = g.rotateBehindSFX
 	}
 
 	g.audioQueue.Enqueue(audioClip)

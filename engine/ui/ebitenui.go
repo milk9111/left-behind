@@ -1,3 +1,5 @@
+// Shamelessly borrowed from https://github.com/quasilyte/roboden-game/blob/master/src/gameui/eui/ebitenui.go
+
 package ui
 
 import (
@@ -12,9 +14,8 @@ import (
 )
 
 var (
-	NormalTextColor    = RGB(0x9dd793)
-	CaretColor         = RGB(0xe7c34b)
-	disabledCaretColor = RGB(0x766326)
+	NormalTextColor = RGB(0x000000)
+	CaretColor      = RGB(0xe7c34b)
 )
 
 type Widget = widget.PreferredSizeLocateableWidget
@@ -83,6 +84,25 @@ func NewAnchorContainer(opts ...widget.AnchorLayoutOpt) *widget.Container {
 			),
 		),
 		widget.ContainerOpts.Layout(widget.NewAnchorLayout(opts...)),
+		// DebugContainerColor(colornames.Green),
+	)
+}
+
+func NewTopCenteredAnchorContainer(padding int) *widget.Container {
+	return widget.NewContainer(
+		widget.ContainerOpts.WidgetOpts(
+			widget.WidgetOpts.LayoutData(
+				widget.AnchorLayoutData{
+					HorizontalPosition: widget.AnchorLayoutPositionCenter,
+					VerticalPosition:   widget.AnchorLayoutPositionStart,
+				},
+			),
+		),
+		widget.ContainerOpts.Layout(
+			widget.NewAnchorLayout(
+				widget.AnchorLayoutOpts.Padding(widget.NewInsetsSimple(padding)),
+			),
+		),
 		// DebugContainerColor(colornames.Green),
 	)
 }
@@ -172,16 +192,12 @@ func DebugContainerColor(color color.Color) widget.ContainerOpt {
 func NewRowLayoutContainerWithMinWidth(minWidth, spacing int, rowscale []bool) *widget.Container {
 	return widget.NewContainer(
 		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
-			StretchHorizontal: true,
-			StretchVertical:   true,
+			HorizontalPosition: widget.AnchorLayoutPositionCenter,
+			VerticalPosition:   widget.AnchorLayoutPositionCenter,
+			StretchHorizontal:  true,
+			StretchVertical:    true,
 		})),
 		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.MinSize(minWidth, 0)),
-		widget.ContainerOpts.WidgetOpts(
-			widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
-				HorizontalPosition: widget.AnchorLayoutPositionCenter,
-				VerticalPosition:   widget.AnchorLayoutPositionCenter,
-			}),
-		),
 		widget.ContainerOpts.Layout(widget.NewGridLayout(
 			widget.GridLayoutOpts.Columns(1),
 			widget.GridLayoutOpts.Stretch([]bool{true}, rowscale),
@@ -219,13 +235,17 @@ func NewTransparentSeparator() widget.PreferredSizeLocateableWidget {
 
 func NewSeparator(ld interface{}) widget.PreferredSizeLocateableWidget {
 	c := widget.NewContainer(
-		widget.ContainerOpts.Layout(widget.NewRowLayout(
-			widget.RowLayoutOpts.Direction(widget.DirectionVertical),
-			widget.RowLayoutOpts.Padding(widget.Insets{
-				Top:    20,
-				Bottom: 20,
-			}))),
-		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(ld)))
+		widget.ContainerOpts.Layout(
+			widget.NewRowLayout(
+				widget.RowLayoutOpts.Direction(widget.DirectionVertical),
+				widget.RowLayoutOpts.Padding(widget.Insets{
+					Top:    20,
+					Bottom: 20,
+				}),
+			),
+		),
+		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(ld)),
+	)
 
 	c.AddChild(widget.NewGraphic(
 		widget.GraphicOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{
@@ -236,6 +256,19 @@ func NewSeparator(ld interface{}) widget.PreferredSizeLocateableWidget {
 	))
 
 	return c
+}
+
+func NewTopCenteredLabel(text string, ff text.Face) *widget.Text {
+	return widget.NewText(
+		widget.TextOpts.WidgetOpts(
+			widget.WidgetOpts.LayoutData(widget.RowLayoutData{
+				Position: widget.RowLayoutPositionStart,
+				Stretch:  true,
+			}),
+		),
+		widget.TextOpts.Position(widget.TextPositionCenter, widget.TextPositionCenter),
+		widget.TextOpts.Text(text, ff, NormalTextColor),
+	)
 }
 
 func NewCenteredLabel(text string, ff text.Face) *widget.Text {
@@ -385,9 +418,15 @@ func NewButtonWithConfig(res *Resources, config ButtonConfig) *widget.Button {
 	}
 
 	options := []widget.ButtonOpt{
-		widget.ButtonOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{
-			Stretch: true,
-		})),
+		widget.ButtonOpts.WidgetOpts(
+			widget.WidgetOpts.LayoutData(
+				widget.AnchorLayoutData{
+					HorizontalPosition: widget.AnchorLayoutPositionCenter,
+					VerticalPosition:   widget.AnchorLayoutPositionStart,
+					Padding:            widget.NewInsetsSimple(100),
+				},
+			),
+		),
 		widget.ButtonOpts.Image(res.Button.Image),
 		widget.ButtonOpts.Text(config.Text, ff, res.Button.TextColors),
 		widget.ButtonOpts.TextPadding(res.Button.Padding),
@@ -396,12 +435,11 @@ func NewButtonWithConfig(res *Resources, config ButtonConfig) *widget.Button {
 				config.OnPressed()
 			}
 		}),
-	}
-
-	if config.OnHover != nil {
-		options = append(options, widget.ButtonOpts.CursorEnteredHandler(func(args *widget.ButtonHoverEventArgs) {
-			config.OnHover()
-		}))
+		widget.ButtonOpts.CursorEnteredHandler(func(args *widget.ButtonHoverEventArgs) {
+			if config.OnHover != nil {
+				config.OnHover()
+			}
+		}),
 	}
 
 	b := widget.NewButton(options...)
@@ -474,7 +512,7 @@ func LoadResources(dst *Resources) *Resources {
 
 	{
 		result.DarkPanel = &PanelResource{
-			Image: NewNineSliceColor(colornames.Darkgreen),
+			Image: NewNineSliceImage(assets.SpritePanel, 20, 20),
 			Padding: widget.Insets{
 				Left:   16,
 				Right:  16,
@@ -484,15 +522,18 @@ func LoadResources(dst *Resources) *Resources {
 		}
 	}
 
+	nineSliceSize := 15
 	{
-		idle := NewNineSliceColor(colornames.Peru)
-		hover := NewNineSliceColor(colornames.Sienna)
-		pressed := NewNineSliceColor(colornames.Saddlebrown)
-		pressedHover := NewNineSliceColor(colornames.Chocolate)
-		disabled := NewNineSliceColor(colornames.Lightgray)
+		idle := NewNineSliceImage(assets.SpriteButtonIdle, nineSliceSize, nineSliceSize)
+		hover := NewNineSliceImage(assets.SpriteButtonHover, nineSliceSize, nineSliceSize)
+		pressed := NewNineSliceImage(assets.SpriteButtonPressed, nineSliceSize, nineSliceSize)
+		pressedHover := NewNineSliceImage(assets.SpriteButtonPressedHover, nineSliceSize, nineSliceSize)
+		disabled := NewNineSliceImage(assets.SpriteButtonDisabled, nineSliceSize, nineSliceSize)
 		buttonPadding := widget.Insets{
-			Left:  30,
-			Right: 30,
+			Left:   30,
+			Right:  30,
+			Top:    10,
+			Bottom: 10,
 		}
 		buttonColors := &widget.ButtonTextColor{
 			Idle:     NormalTextColor,
@@ -512,17 +553,17 @@ func LoadResources(dst *Resources) *Resources {
 	}
 
 	result.Font1 = &text.GoTextFace{
-		Source: assets.FontGoregular,
+		Source: assets.FontRoboto,
 		Size:   80,
 	}
 
 	result.Font2 = &text.GoTextFace{
-		Source: assets.FontGoregular,
+		Source: assets.FontRoboto,
 		Size:   40,
 	}
 
 	result.Font3 = &text.GoTextFace{
-		Source: assets.FontGoregular,
+		Source: assets.FontRoboto,
 		Size:   20,
 	}
 

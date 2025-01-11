@@ -64,7 +64,7 @@ func (g *Game) Init() {
 
 func (g *Game) loadLevel() {
 	render := system.NewRender(g.game.WorldWidth, g.game.WorldHeight)
-	debug := system.NewDebug(g.nextStep, g.debugPause, g.reloadLevelFile)
+	// debug := system.NewDebug(g.nextStep, g.debugPause, g.reloadLevelFile)
 	ui := system.NewUI()
 	g.inputSystem = system.NewInput(g.restartlevel)
 
@@ -76,7 +76,7 @@ func (g *Game) loadLevel() {
 		system.NewAudio(),
 		render,
 		ui, // doesn't matter where ui is in this order
-		debug,
+		// debug,
 	}
 
 	g.drawables = []Drawable{
