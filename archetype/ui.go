@@ -2,6 +2,7 @@ package archetype
 
 import (
 	"fmt"
+	"image/color"
 
 	"github.com/ebitenui/ebitenui"
 	"github.com/ebitenui/ebitenui/widget"
@@ -19,15 +20,14 @@ func NewUI(w donburi.World, game *component.GameData, levelIndex int) *donburi.E
 
 	rootContainer := ui.NewRowLayoutContainer(25, []bool{false, true})
 
-	rowContainer := ui.NewCenteredAnchorContainer(0)
-	rootContainer.AddChild(rowContainer)
-
 	levelLabelContainer := ui.NewCenteredAnchorContainer(20)
-	rowContainer.AddChild(levelLabelContainer)
+	rootContainer.AddChild(levelLabelContainer)
 
-	levelLabel := ui.NewCenteredLabel(
+	levelLabel := ui.NewColoredLabel(
 		fmt.Sprintf("%d / %d", levelIndex, len(assets.Levels)),
 		res.Font2,
+		color.White,
+		widget.TextOpts.Position(widget.TextPositionStart, widget.TextPositionStart),
 	)
 	levelLabelContainer.AddChild(levelLabel)
 

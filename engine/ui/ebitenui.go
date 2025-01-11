@@ -250,7 +250,7 @@ func NewCenteredLabel(text string, ff text.Face) *widget.Text {
 	)
 }
 
-func NewColoredLabel(text string, ff text.Face, clr color.RGBA, options ...widget.TextOpt) *widget.Text {
+func NewColoredLabel(text string, ff text.Face, clr color.Color, options ...widget.TextOpt) *widget.Text {
 	opts := []widget.TextOpt{
 		widget.TextOpts.Text(text, ff, clr),
 	}

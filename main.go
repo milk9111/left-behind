@@ -133,7 +133,7 @@ func NewGame(startingLevel *assets.Level, config Config) *Game {
 				gameData,
 			),
 		},
-		currentScene: scene.SceneWin,
+		currentScene: scene.SceneGame,
 	}
 }
 
