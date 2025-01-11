@@ -55,8 +55,10 @@ func (p *Player) Update(w donburi.World) {
 func (p *Player) OnInput(w donburi.World, inputEventType component.InputEventType) {
 	nextCol, nextRow := engine.Vec2ToIndex(p.cell.Position)
 	if inputEventType == component.InputEventTypeMoveLeft {
+		// fmt.Println("moving left")
 		nextCol--
 	} else if inputEventType == component.InputEventTypeMoveBehind {
+		// fmt.Println("moving right")
 		nextRow++
 	} else {
 		return // exit early because it's not input player cares about

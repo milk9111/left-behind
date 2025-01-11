@@ -207,6 +207,7 @@ func (g *Game) OnStartedPlayerMove(_ donburi.World, _ event.StartedPlayerMoveDat
 	if g.paused {
 		return
 	}
+	// fmt.Println("started player move, disabling input")
 	g.inputSystem.SetDisabled(true)
 }
 
@@ -214,6 +215,7 @@ func (g *Game) OnFinishedPlayerMove(_ donburi.World, _ event.FinishedPlayerMoveD
 	if g.paused {
 		return
 	}
+	// fmt.Println("finished player move, enabling input")
 	g.inputSystem.SetDisabled(false)
 }
 

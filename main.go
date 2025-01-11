@@ -20,7 +20,7 @@ func init() {
 
 func main() {
 	forceMonitorFlag := flag.Bool("q", false, "force game window to third monitor (for testing)")
-	startingLevelFlag := flag.String("L", "A", "start game at specific level")
+	startingLevelFlag := flag.String("L", "", "start game at specific level")
 	flag.Parse()
 
 	// couldn't get the screen size to dynamically resize so decided to hardcode it here
@@ -48,8 +48,10 @@ func main() {
 	ebiten.MaximizeWindow()
 
 	var startingLevel *assets.Level
-	if startingLevelFlag != nil {
+	startingScene := scene.SceneMainMenu
+	if startingLevelFlag != nil && *startingLevelFlag != "" {
 		startingLevel = assets.Levels[*startingLevelFlag]
+		startingScene = scene.SceneGame
 	} else {
 		startingLevel = assets.StartingLevel()
 	}
@@ -64,7 +66,7 @@ func main() {
 	musicPlayer.SetVolume(0.35)
 	musicPlayer.Play()
 
-	err = ebiten.RunGame(NewGame(startingLevel, config))
+	err = ebiten.RunGame(NewGame(startingLevel, startingScene, config))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -93,7 +95,7 @@ type Config struct {
 	ScreenHeight int
 }
 
-func NewGame(startingLevel *assets.Level, config Config) *Game {
+func NewGame(startingLevel *assets.Level, startingScene scene.Scene, config Config) *Game {
 	gameData := &component.GameData{
 		WorldWidth:  config.WorldWidth,
 		WorldHeight: config.WorldHeight,
@@ -117,7 +119,7 @@ func NewGame(startingLevel *assets.Level, config Config) *Game {
 				gameData,
 			),
 		},
-		currentScene: scene.SceneMainMenu,
+		currentScene: startingScene,
 	}
 }
 
